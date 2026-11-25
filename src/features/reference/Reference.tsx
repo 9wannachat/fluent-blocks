@@ -3,14 +3,14 @@ import { Input } from '../../components/ui/input'
 import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
 import { Label } from '../../components/ui/label'
 import { AlertMessage } from '../../components/ui/alert-message'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Search } from 'lucide-react'
+import { ArrowRight, ChevronRight, Search } from 'lucide-react'
 import MiniSearch from 'minisearch'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { curriculum, lessonById, patternById } from '../../content'
 import { modules } from '../../content/modules'
-import { BackLink, Example, Heading, Missing, Panel } from '../../components/ui'
+import { BackLink, Example, Heading, Missing, Panel, RowLink } from '../../components/ui'
 import { db, enqueuePattern, ratePattern } from '../../storage'
 import { localDateKey } from '../../domain/review'
 import type { Pattern } from '../../domain/content'
@@ -63,9 +63,6 @@ function PatternRow({ pattern }: { pattern: Pattern }) {
   </Link></li>
 }
 
-function RowLink({ to, children }: { to: string; children: ReactNode }) {
-  return <li><Link className="lesson-row" to={to}><span className="lesson-text"><span className="lesson-title">{children}</span></span><ChevronRight className="lesson-chevron" size={18} aria-hidden="true" /></Link></li>
-}
 
 export function Reference() {
   const [params, setParams] = useSearchParams()
@@ -119,7 +116,7 @@ export function PatternPage() {
     <Panel className="stack"><h2>ตัวอย่าง</h2>{pattern.examples.map((item) => <Example {...item} key={item.en} />)}
       {pattern.mistakes.map((item) => <p key={item.wrong}><s lang="en">{item.wrong}</s> → <strong lang="en">{item.right}</strong> · {item.note}</p>)}
     </Panel>
-    <Panel className="stack"><h2>บทเรียนที่เกี่ยวข้อง</h2><ul>{pattern.lessons.map((id) => <li key={id}><Link to={`/learn/${id}`}>{lessonById.get(id)?.titleTh}</Link></li>)}</ul>
+    <Panel className="stack"><h2>บทเรียนที่เกี่ยวข้อง</h2><ul className="clean lesson-list">{pattern.lessons.map((id) => <RowLink key={id} to={`/learn/${id}`} subtitle={lessonById.get(id)?.titleEn}>{lessonById.get(id)?.titleTh}</RowLink>)}</ul>
       {review ? <p>ทบทวนครั้งถัดไป {review.dueOn} · <Link to="/review">เปิดคิว</Link></p> : <Button type="button" onClick={() => void add()}>เพิ่มในคิวทบทวน</Button>}
       {error && <AlertMessage>เพิ่มรายการไม่ได้ ลองอีกครั้ง</AlertMessage>}
     </Panel>
@@ -161,7 +158,7 @@ export function Review() {
   const today = localDateKey(new Date())
   const due = useLiveQuery(() => db.reviews.where('dueOn').belowOrEqual(today).toArray(), [today])
   const next = due?.map((item) => patternById.get(item.patternId)).find((item) => item !== undefined)
-  return <div className="stack page"><Heading label="REVIEW" title="ทบทวนจากความจำ" detail="เมื่อให้คะแนนความจำ ระบบใช้ช่วง 1, 3, 7, 14 และ 30 วันเพื่อจัดคิวให้กลับมาฝึกอีกครั้ง" />
-    {due === undefined ? <p role="status">กำลังเปิดคิว</p> : next ? <ReviewCard pattern={next} key={next.id} /> : <Panel className="stack"><h2>วันนี้ไม่มีรูปประโยคถึงกำหนด</h2><Link to="/reference">เลือกเพิ่มรูปประโยคจากคลัง</Link></Panel>}
+  return <div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="REVIEW" title="ทบทวนจากความจำ" detail="เมื่อให้คะแนนความจำ ระบบใช้ช่วง 1, 3, 7, 14 และ 30 วันเพื่อจัดคิวให้กลับมาฝึกอีกครั้ง" />
+    {due === undefined ? <p role="status">กำลังเปิดคิว</p> : next ? <ReviewCard pattern={next} key={next.id} /> : <Panel className="stack"><h2>วันนี้ไม่มีรูปประโยคถึงกำหนด</h2><p className="muted">เปิดรูปประโยคในคลัง แล้วกด “เพิ่มในคิวทบทวน” เพื่อให้กลับมาฝึกตามรอบ</p><Button asChild variant="outline" className="module-review"><Link to="/reference">เลือกรูปประโยคจากคลัง <ArrowRight size={15} /></Link></Button></Panel>}
   </div>
 }

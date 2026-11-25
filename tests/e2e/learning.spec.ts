@@ -116,7 +116,7 @@ test('theme switcher applies light, system and dark and survives reload', async 
   await expect(html).toHaveCSS('color-scheme', 'light')
   await page.reload()
   await expect(html).toHaveAttribute('data-theme', 'light')
-  for (const path of ['/', '/learn', '/learn/m2-06', '/practice/builder']) {
+  for (const path of ['/', '/learn', '/learn/m2-06', '/learn/diagnostic', '/practice', '/practice/builder', '/practice/decision', '/practice/connectors', '/practice/conversation', '/practice/conversation/clarification', '/practice/podcast', '/reference', '/reference/notebook', '/reference/pattern/p-does-she-like', '/review', '/settings']) {
     await page.goto(path)
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
     expect(results.violations.map(({ id }) => id)).toEqual([])

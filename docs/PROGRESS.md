@@ -62,3 +62,12 @@ Follow-up polish: The Learn page's 12-week plan is a compact card with an expand
 Buttons across the app, including icon buttons, are now pill-shaped.
 Back links on every subpage use a shared BackLink pill with an arrow icon instead of an underlined ← text link.
 The mobile tab bar now shows an icon and a single Thai label, with the active icon in a soft pill on a translucent bar. English stays as the accessible name.
+
+## Consistency pass
+
+- Lesson pages wait for saved progress before rendering the section tabs, using a shimmer placeholder, so section 1 no longer flashes before the resume point.
+- Each exercise shows its latest saved outcome when reopened: ครั้งก่อนตอบถูกแล้ว, ครั้งก่อนยังไม่ถูก or ประเมินตนเองแล้ว. The diagnostic opts out. Typed answer text is still not stored.
+- The Sentence Builder intro lives in the page heading.
+- Inputs, selects and text areas share a rounded, raised field style with an accent focus ring and an invalid state.
+- Remaining pages were brought in line. Conversation scenarios are hover cards. Podcast, Notebook and Review have back links. The Review empty state explains how to add patterns. The diagnostic hides "next" until answered. Bookmarks, related lessons and pattern links use the shared RowLink.
+- Vitest passed 30 tests and Playwright passed 30 checks. axe runs in light mode on 16 routes, and a one-off dark sweep of the same routes was clean.

@@ -1,7 +1,7 @@
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Volume2 } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Volume2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../storage'
@@ -63,4 +63,12 @@ export function Example({ en, th, note }: { en: string; th: string; note?: strin
 /** Quiet pill link back to the parent page. */
 export function BackLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link className="back-link" to={to}><ArrowLeft size={16} aria-hidden="true" />{children}</Link>
+}
+
+/** Full-row list link with a chevron. Use inside <ul className="clean lesson-list">. */
+export function RowLink({ to, children, subtitle, lang }: { to: string; children: React.ReactNode; subtitle?: React.ReactNode; lang?: string }) {
+  return <li><Link className="lesson-row" to={to}>
+    <span className="lesson-text"><span className="lesson-title" lang={lang}>{children}</span>{subtitle && <small>{subtitle}</small>}</span>
+    <ChevronRight className="lesson-chevron" size={18} aria-hidden="true" />
+  </Link></li>
 }

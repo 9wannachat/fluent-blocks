@@ -7,7 +7,7 @@ import { AlertMessage } from '../../components/ui/alert-message'
 import { useState, type FormEvent } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { Heading, Panel, Speak } from '../../components/ui'
+import { BackLink, Heading, Panel, RowLink, Speak } from '../../components/ui'
 import { curriculum, patternById } from '../../content'
 import { db, saveVocabulary, sourceUrlSchema, type VocabularyEntry } from '../../storage'
 
@@ -125,8 +125,8 @@ export function Vocabulary() {
   }
 
   return <div className="stack page">
+    <BackLink to="/reference">คลังอ้างอิง</BackLink>
     <Heading label="REFERENCE" title="สมุดคำศัพท์" detail="เก็บคำกับตัวอย่างที่คุณพร้อมนำไปพูด และเชื่อมกับรูปแบบที่ใช้ซ้ำได้" />
-    <div><Link to="/reference">กลับคลังอ้างอิง</Link></div>
     <div id="vocabulary-editor">
       <VocabularyForm key={`${entry?.id ?? 'new'}-${revision}`} entry={entry} onDone={(saved) => {
         setMessage(saved ? 'บันทึกคำศัพท์แล้ว' : '')
@@ -147,9 +147,9 @@ export function Vocabulary() {
         {item.meaningTh && <p>{item.meaningTh}</p>}
         {item.example && <p lang="en">{item.example}</p>}
         {item.notes && <p>{item.notes}</p>}
-        {item.patternIds.length > 0 && <ul>{item.patternIds.map((id) => {
+        {item.patternIds.length > 0 && <ul className="clean lesson-list">{item.patternIds.map((id) => {
           const pattern = patternById.get(id)
-          return <li key={id}>{pattern ? <Link to={`/reference/pattern/${id}`} lang="en">{pattern.template}</Link> : id}</li>
+          return pattern ? <RowLink key={id} to={`/reference/pattern/${id}`} lang="en" subtitle={pattern.meaning}>{pattern.template}</RowLink> : <li key={id}>{id}</li>
         })}</ul>}
         <div className="actions">
           {item.sourceUrl && sourceUrlSchema.safeParse(item.sourceUrl).success && <a href={item.sourceUrl} target="_blank" rel="noreferrer noopener">เปิดต้นทาง</a>}

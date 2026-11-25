@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react'
 import { Checkbox } from '../../components/ui/checkbox'
 import { Button } from '../../components/ui/button'
 import { Label } from '../../components/ui/label'
@@ -150,9 +151,10 @@ export function Conversation() {
     <BackLink to="/practice">ฝึกใช้</BackLink>
     <Heading label="CONVERSATION LAB" title="ฝึกสนทนา" detail="เลือกสถานการณ์ ลองตอบ แล้วฟังว่าคู่สนทนาอาจถามอะไรต่อ" />
     <div className="grid two">
-      {scenarios.map((item) => <Panel className="stack" key={item.id}>
+      {scenarios.map((item) => <Panel className="stack lab-link scenario-card" key={item.id}>
         <h2><Link to={`${scenarioPath}/${item.id}`}>{item.title}</Link></h2>
         <p>{item.context}</p>
+        <ChevronRight className="lab-arrow" size={18} aria-hidden="true" />
       </Panel>)}
     </div>
   </div>

@@ -1,7 +1,7 @@
 import { Button } from '../../components/ui/button'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BackLink, Heading, Panel } from '../../components/ui'
+import { BackLink, Heading, Panel, RowLink } from '../../components/ui'
 import { lessonById } from '../../content'
 import { Exercise } from '../practice/Exercise'
 
@@ -40,12 +40,12 @@ export function Diagnostic() {
     <Heading label="DIAGNOSTIC" title="สำรวจทักษะที่อยากฝึก" detail="ใช้ผลเพื่อเลือกบทเรียนที่เหมาะกับคุณ และเลือกเปลี่ยนเองได้ทุกเมื่อ" />
     {finished ? <Panel className="stack"><h2>บทที่แนะนำ</h2>
       {missed.length === 0 ? <p>ทำชุดนี้ได้ครบ ลองเลือกบทที่ท้าทายขึ้นหรือไปฝึกพูดในสถานการณ์จริง</p> :
-        <ul>{missed.map(([lesson, skill]) => <li key={lesson}>{lessonById.has(lesson) ? <Link to={`/learn/${lesson}`}>{lessonById.get(lesson)?.titleTh}</Link> : <span>{skill}</span>}</li>)}</ul>}
+        <ul className="clean lesson-list">{missed.map(([lesson, skill]) => lessonById.has(lesson) ? <RowLink key={lesson} to={`/learn/${lesson}`} subtitle={skill}>{lessonById.get(lesson)?.titleTh}</RowLink> : <li key={lesson} className="lesson-row">{skill}</li>)}</ul>}
       <div className="actions"><Button asChild><Link to="/learn">เลือกบทเรียนเอง</Link></Button><Button variant="outline" type="button" onClick={restart}>ทำใหม่</Button></div>
     </Panel> : <Panel className="stack"><h2>{skill} · ข้อ {index + 1}/{items.length}</h2>
-      <Exercise key={`${session}-${index}`} objective={id} item={{ id: `diagnostic-${index + 1}`, kind: 'choice', prompt, options, answers: [correct], hint: 'คิดถึงสิ่งที่ต้องการสื่อและหน้าที่ของคำแต่ละคำ', explanation: `รูป “${correct}” ตรงกับบริบทของข้อนี้` }}
+      <Exercise key={`${session}-${index}`} showHistory={false} objective={id} item={{ id: `diagnostic-${index + 1}`, kind: 'choice', prompt, options, answers: [correct], hint: 'คิดถึงสิ่งที่ต้องการสื่อและหน้าที่ของคำแต่ละคำ', explanation: `รูป “${correct}” ตรงกับบริบทของข้อนี้` }}
         onAnswer={(_, valid) => setResults((current) => index in current ? current : { ...current, [index]: valid })} />
-      <Button type="button" disabled={!(index in results)} onClick={() => index === items.length - 1 ? setFinished(true) : setIndex(index + 1)}>{index === items.length - 1 ? 'ดูบทที่แนะนำ' : 'ข้อต่อไป'}</Button>
+      {index in results && <Button type="button" onClick={() => index === items.length - 1 ? setFinished(true) : setIndex(index + 1)}>{index === items.length - 1 ? 'ดูบทที่แนะนำ' : 'ข้อต่อไป'}</Button>}
     </Panel>}
   </div>
 }

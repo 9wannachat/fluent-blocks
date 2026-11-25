@@ -45,3 +45,24 @@ it('explains an empty submit and locks after a correct retry', async () => {
   expect(field.disabled).toBe(true)
   expect(screen.getByRole('button', { name: 'ดูคำอธิบาย' })).toBeTruthy()
 })
+
+it('shows the latest saved outcome when the exercise is opened again', async () => {
+  const user = userEvent.setup()
+  const first = render(<Exercise item={fill} objective="m2-06" />)
+  await user.type(screen.getByLabelText('คำตอบของคุณ'), 'Do{Enter}')
+  await screen.findByText('ยังไม่ถูก')
+  first.unmount()
+  render(<Exercise item={fill} objective="m2-06" />)
+  expect(await screen.findByText('ครั้งก่อนยังไม่ถูก ลองอีกครั้ง')).toBeTruthy()
+})
+
+it('hides history when asked, as in the diagnostic', async () => {
+  const user = userEvent.setup()
+  const first = render(<Exercise item={fill} objective="m2-06" />)
+  await user.type(screen.getByLabelText('คำตอบของคุณ'), 'Are{Enter}')
+  await screen.findByText('ถูกต้อง')
+  first.unmount()
+  render(<Exercise item={fill} objective="m2-06" showHistory={false} />)
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(screen.queryByText('ครั้งก่อนตอบถูกแล้ว')).toBeNull()
+})

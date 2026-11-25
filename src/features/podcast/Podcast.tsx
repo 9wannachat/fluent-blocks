@@ -5,8 +5,7 @@ import { Label } from '../../components/ui/label'
 import { AlertMessage } from '../../components/ui/alert-message'
 import { useMemo, useState, type FormEvent } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Link } from 'react-router-dom'
-import { Heading, Panel, Speak } from '../../components/ui'
+import { BackLink, Heading, Panel, RowLink, Speak } from '../../components/ui'
 import { curriculum } from '../../content'
 import { db, savePodcastEntry, sourceUrlSchema, type PodcastEntry } from '../../storage'
 import { findRelatedPatterns, parseTimestamp, timestampLabel } from './related'
@@ -89,9 +88,7 @@ function PodcastForm({ entry, onDone }: { entry?: PodcastEntry; onDone: (saved: 
       <Label>ความหมายภาษาไทย<Textarea key={String(fillSample)} name="meaning" rows={2} maxLength={5000} defaultValue={entry?.meaningTh ?? (fillSample ? sample.meaning : '')} /></Label>
       <Label>กลุ่มคำที่อยากจำ (หนึ่งรายการต่อบรรทัด)<Textarea rows={2} maxLength={4000} value={chunks} onChange={(event) => setChunks(event.target.value)} /></Label>
       <Label>หัวข้อไวยากรณ์ (คั่นด้วยจุลภาค)<Input maxLength={2000} value={tags} onChange={(event) => setTags(event.target.value)} /></Label>
-      {related.length > 0 && <div><h3>รูปแบบที่เกี่ยวข้อง</h3><ul>{related.map((pattern) => <li key={pattern.id}>
-        <Link to={`/reference/pattern/${pattern.id}`} lang="en">{pattern.template}</Link>
-      </li>)}</ul></div>}
+      {related.length > 0 && <div><h3>รูปแบบที่เกี่ยวข้อง</h3><ul className="clean lesson-list">{related.map((pattern) => <RowLink key={pattern.id} to={`/reference/pattern/${pattern.id}`} lang="en" subtitle={pattern.meaning}>{pattern.template}</RowLink>)}</ul></div>}
       <Label>ลองเขียนประโยคของตัวเอง<Textarea name="personal" rows={2} maxLength={5000} defaultValue={entry?.personalExample} /></Label>
       <Label>บันทึกเพิ่มเติม<Textarea name="notes" rows={2} maxLength={5000} defaultValue={entry?.notes} /></Label>
       <div className="actions"><Button type="submit" disabled={pending}>บันทึกประโยค</Button>
@@ -128,6 +125,7 @@ export function Podcast() {
   }
 
   return <div className="stack page">
+    <BackLink to="/practice">ฝึกใช้</BackLink>
     <Heading label="PODCAST LAB" title="สมุดประโยคจากสิ่งที่ฟัง" detail="เก็บประโยคสั้นที่ได้ยิน แยกกลุ่มคำ แล้วลองพูดประโยคของตัวเอง" />
     <Panel className="stack">
       <h2>ฝึกแยกประโยค</h2>

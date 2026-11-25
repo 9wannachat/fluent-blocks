@@ -11,7 +11,7 @@ import { curriculum, lessonById, patternById } from '../../content'
 import { modules } from '../../content/modules'
 import { db, updateProgress } from '../../storage'
 import { lessonSections as sections, lessonSectionsShort } from './lesson-sections'
-import { BackLink, Example, Heading, Missing, Panel } from '../../components/ui'
+import { BackLink, Example, Heading, Missing, Panel, RowLink } from '../../components/ui'
 import { Exercise } from '../practice/Exercise'
 
 const orderedLessons = [...curriculum.lessons].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }))
@@ -42,7 +42,7 @@ export function Learn() {
         <p className="plan-note">เลือกข้ามบทที่ทำได้แล้ว และย้อนฝึกทักษะที่ติดขัดจากหน้าหลักได้ทุกสัปดาห์</p>
       </CollapsibleContent>
     </Panel></Collapsible>
-    {saved.length > 0 && <Panel><h2>บุ๊กมาร์ก</h2><ul>{saved.map(({ lessonId }) => <li key={lessonId}><Link to={`/learn/${lessonId}`}>{lessonById.get(lessonId)?.titleTh}</Link></li>)}</ul></Panel>}
+    {saved.length > 0 && <Panel className="module-panel"><h2>บุ๊กมาร์ก</h2><ul className="clean lesson-list">{saved.map(({ lessonId }) => <RowLink key={lessonId} to={`/learn/${lessonId}`} subtitle={lessonById.get(lessonId)?.titleEn}>{lessonById.get(lessonId)?.titleTh}</RowLink>)}</ul></Panel>}
     {modules.filter((module) => orderedLessons.some((lesson) => lesson.module === module.id)).map((module) => {
       const lessons = orderedLessons.filter((lesson) => lesson.module === module.id)
       const done = lessons.filter((lesson) => progress.some((entry) => entry.lessonId === lesson.id && entry.completed)).length
@@ -73,7 +73,8 @@ export function Learn() {
 export function LessonPage() {
   const { lessonId = '' } = useParams()
   const lesson = lessonById.get(lessonId)
-  const progress = useLiveQuery(() => db.progress.get(lessonId), [lessonId])
+  // null = no saved progress yet; undefined = still loading (render nothing that depends on the resume point).
+  const progress = useLiveQuery(async () => (await db.progress.get(lessonId)) ?? null, [lessonId])
   const [error, setError] = useState('')
   useEffect(() => {
     if (!lesson) return
@@ -95,7 +96,7 @@ export function LessonPage() {
       <span className="inline muted"><Clock3 size={16} /> {lesson.minutes} นาที</span>
     </div>
     {error && <AlertMessage>{error}</AlertMessage>}
-    <Tabs className="lesson-tabs" value={String(active)} activationMode="manual" onValueChange={(value) => void save({ resumeBlock: Number(value) })}>
+    {progress === undefined ? <div className="lesson-loading" role="status"><span className="sr-only">กำลังเปิดบทเรียน</span></div> : <Tabs className="lesson-tabs" value={String(active)} activationMode="manual" onValueChange={(value) => void save({ resumeBlock: Number(value) })}>
       <TabsList aria-label="ส่วนของบทเรียน">{sections.map((section, index) => <TabsTrigger value={String(index)} key={section}><span className="tab-step" aria-hidden="true">{index + 1}</span><span className="tab-full">{section}</span><span className="tab-short" aria-hidden="true">{lessonSectionsShort[index]}</span></TabsTrigger>)}</TabsList>
     <TabsContent value="0"><Panel className="stack">
       <h2>เป้าหมาย</h2><p>{lesson.objective}</p>
@@ -110,7 +111,7 @@ export function LessonPage() {
           <li className="builder-token role-modifier"><span lang="en">Modifier</span><small>คำขยายเวลา ระดับ หรือรายละเอียดอื่น</small></li>
         </ul>
       </Disclosure>
-      {lesson.prerequisites.length > 0 && <><h3>บทที่เกี่ยวข้อง</h3><ul>{lesson.prerequisites.map((id) => <li key={id}><Link to={`/learn/${id}`}>{lessonById.get(id)?.titleTh}</Link></li>)}</ul></>}
+      {lesson.prerequisites.length > 0 && <><h3>บทที่เกี่ยวข้อง</h3><ul className="clean lesson-list">{lesson.prerequisites.map((id) => <RowLink key={id} to={`/learn/${id}`} subtitle={lessonById.get(id)?.titleEn}>{lessonById.get(id)?.titleTh}</RowLink>)}</ul></>}
     </Panel></TabsContent>
     <TabsContent value="1"><Panel className="stack">
       <h2>ตัวอย่างที่นำไปใช้ได้</h2>{lesson.examples.map((item) => <Example {...item} key={item.en} />)}
@@ -125,10 +126,10 @@ export function LessonPage() {
         id: `${lesson.id}-speaking`, kind: 'speaking', prompt: 'จดใจความที่พูดหรือประโยคที่พูดออกมา',
         answers: lesson.examples.slice(0, 2).map((item) => item.en), hint: lesson.formula, explanation: lesson.concept,
       }} />
-      <h3>รูปแบบที่ควรทบทวน</h3><ul>{lesson.review.map((id) => <li key={id}><Link to={`/reference/pattern/${id}`}>{patternById.get(id)?.template}</Link></li>)}</ul>
+      <h3>รูปแบบที่ควรทบทวน</h3><ul className="clean lesson-list">{lesson.review.map((id) => <RowLink key={id} to={`/reference/pattern/${id}`} lang="en" subtitle={patternById.get(id)?.meaning}>{patternById.get(id)?.template}</RowLink>)}</ul>
       <Button type="button" aria-pressed={progress?.completed ?? false} onClick={() => void save({ completed: !progress?.completed })}>{progress?.completed ? 'อ่านจบแล้ว' : 'บันทึกว่าอ่านจบ'}</Button>
     </Panel></TabsContent>
-    </Tabs>
+    </Tabs>}
     {active === sections.length - 1 && <div className="actions">{orderedLessons[orderedLessons.indexOf(lesson) + 1] && <Button asChild variant="outline"><Link to={`/learn/${orderedLessons[orderedLessons.indexOf(lesson) + 1].id}`}>บทถัดไป <ArrowRight size={16} /></Link></Button>}<Link to={`/learn/module/${lesson.module}/review`}>ทบทวนท้ายหมวด</Link></div>}
     {active < sections.length - 1 && <Button type="button" onClick={() => void save({ resumeBlock: active + 1 })}>{sections[active + 1]} <ArrowRight size={16} /></Button>}
   </div>

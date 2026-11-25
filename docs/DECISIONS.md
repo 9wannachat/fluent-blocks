@@ -14,3 +14,4 @@
 - Sentence Builder uses a radio-group of chips for option sets of up to about a dozen short items. Arrow keys move between chips. The long intention list stays a native select. Dashboard cards show an explanatory empty state rather than zero metrics.
 - Type is kept light for Thai text. Headings use weights of 600–620, body text 1.7 line height, and no negative tracking. Pages and panels use generous spacing, and lesson lists are full-row links rather than underlined text.
 - Buttons, chips, the theme switcher and navigation items use pill radii. Cards and inputs keep their softer rectangular corners.
+- Exercise history shows only the latest outcome per exercise ID from the attempts store. Answer text is not persisted, so the backup schema is unchanged. Navigation lists use the shared RowLink and subpages use BackLink.

@@ -100,9 +100,6 @@ export function Builder() {
 
   return (
     <section className="stack builder">
-      <header>
-        <p>เริ่มจากสิ่งที่อยากสื่อ แล้วดูว่าเหตุใดจึงเลือกคำและเรียงแบบนี้</p>
-      </header>
       <Panel className="builder-preview">
         <div className="inline spread">
           <div aria-live="polite" aria-atomic="true">

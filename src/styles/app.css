@@ -405,3 +405,26 @@ fieldset { min-width: 0; padding: 0; border: 0 }
 .bottom-nav a:hover { background: transparent; color: var(--ink) }
 .bottom-nav a.active { background: transparent; color: var(--ink); font-weight: 600 }
 .bottom-nav a.active svg { background: var(--soft); color: var(--accent) }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap }
+.lesson-loading { min-height: 22rem; border-radius: .85rem; border: 1px solid var(--line); background: linear-gradient(90deg, var(--surface) 0%, var(--surface-raised) 50%, var(--surface) 100%); background-size: 200% 100%; animation: lesson-shimmer 1.2s ease-in-out infinite }
+@keyframes lesson-shimmer { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+
+.exercise-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem .75rem }
+.exercise-history { display: inline-flex; align-items: center; gap: .35rem; padding: .1rem .6rem; border-radius: 999px; font-size: .75rem; border: 1px solid var(--line); color: var(--subtle) }
+.exercise-history.correct, .exercise-history.self-assessed { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: var(--good-surface) }
+.exercise-history.incorrect { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: var(--bad-surface) }
+
+/* Fields: soft rounded boxes that match the pill buttons without becoming pills themselves. */
+[data-slot="input"],[data-slot="native-select"],[data-slot="textarea"] { border-radius: .8rem; border: 1px solid var(--control-line); background: var(--surface-raised); padding: .6rem .95rem; box-shadow: none; transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease }
+[data-slot="native-select"] { padding-inline-end: 2.5rem; appearance: none; cursor: pointer }
+[data-slot="native-select-icon"] { right: 1rem; opacity: .8; color: var(--subtle) }
+[data-slot="input"]::placeholder,[data-slot="textarea"]::placeholder { color: var(--metadata) }
+@media (hover: hover) { [data-slot="input"]:hover:not(:disabled),[data-slot="native-select"]:hover:not(:disabled),[data-slot="textarea"]:hover:not(:disabled) { border-color: var(--subtle) } }
+[data-slot="input"]:focus-visible,[data-slot="native-select"]:focus-visible,[data-slot="textarea"]:focus-visible { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent) }
+[data-slot="input"][aria-invalid="true"],[data-slot="textarea"][aria-invalid="true"] { border-color: var(--bad); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 18%, transparent) }
+.answer-input { margin-top: .4rem }
+[data-slot="label"] { gap: .4rem }
+
+.scenario-card h2 { padding-right: 1.75rem }
+.scenario-card p { color: var(--subtle) }

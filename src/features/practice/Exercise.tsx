@@ -6,17 +6,29 @@ import { Label } from '../../components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
 import { AlertMessage } from '../../components/ui/alert-message'
 import { useId, useRef, useState } from 'react'
-import { CircleCheck, CircleX, Info } from 'lucide-react'
+import { CircleCheck, CircleX, History, Info } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import type { Exercise as ExerciseData } from '../../domain/content'
 import { getAnswerFeedback, matchesAnswer } from '../../domain/feedback'
-import { recordAttempt } from '../../storage'
+import { db, recordAttempt } from '../../storage'
 import { Speak } from '../../components/ui'
 
-export function Exercise({ item, objective, onAnswer }: {
+const historyLabels = {
+  correct: 'ครั้งก่อนตอบถูกแล้ว',
+  incorrect: 'ครั้งก่อนยังไม่ถูก ลองอีกครั้ง',
+  'self-assessed': 'ครั้งก่อนประเมินตนเองแล้ว',
+} as const
+
+export function Exercise({ item, objective, onAnswer, showHistory = true }: {
   item: ExerciseData
   objective: string
   onAnswer?: (answer: string, correct: boolean) => void
+  /** Show the latest saved outcome for this exercise. Off for one-time checks such as the diagnostic. */
+  showHistory?: boolean
 }) {
+  const last = useLiveQuery(async () => showHistory
+    ? (await db.attempts.where('exerciseId').equals(item.id).toArray()).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0] ?? null
+    : null, [item.id, showHistory])
   const [response, setResponse] = useState('')
   const [ordered, setOrdered] = useState<number[]>([])
   const [result, setResult] = useState<boolean | null>(null)
@@ -124,8 +136,14 @@ export function Exercise({ item, objective, onAnswer }: {
     ? 'เปิดคำใบ้ หรือดูเฉลยพร้อมคำอธิบายได้เลย'
     : 'แก้คำตอบแล้วตรวจอีกครั้ง หรือเปิดคำใบ้ก่อน')
 
+  const fresh = result === null && !locked && misses === 0 && !needsComparison
   return <form className="exercise stack" onSubmit={(event) => { event.preventDefault(); submit() }}>
-    <p><strong>{item.prompt}</strong></p>
+    <div className="exercise-head">
+      <p><strong>{item.prompt}</strong></p>
+      {fresh && last && <span className={`exercise-history ${last.outcome}`}>
+        {last.outcome === 'incorrect' ? <History size={14} aria-hidden="true" /> : <CircleCheck size={14} aria-hidden="true" />}{historyLabels[last.outcome]}
+      </span>}
+    </div>
     {ordering ? <div className="stack">
       <div className="inline wrap" aria-label="ลำดับคำที่เลือก">
         {ordered.map((index) => <Button type="button" variant="outline" key={index} disabled={locked} onClick={() => { setOrdered(ordered.filter((item) => item !== index)) }}>{item.options?.[index]} ×</Button>)}

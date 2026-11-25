@@ -63,7 +63,7 @@ export function App() {
         <Route path="/learn/module/:moduleId/review" element={<ModuleReview />} />
         <Route path="/learn/:lessonId" element={<LessonPage key={pathname} />} />
         <Route path="/practice" element={<Practice />} />
-        <Route path="/practice/builder" element={<div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" /><Builder /></div>} />
+        <Route path="/practice/builder" element={<div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" detail="เริ่มจากสิ่งที่อยากสื่อ แล้วดูว่าเหตุใดจึงเลือกคำและเรียงแบบนี้" /><Builder /></div>} />
         <Route path="/practice/decision" element={<DecisionLab />} />
         <Route path="/practice/connectors" element={<ConnectorLab />} />
         <Route path="/practice/podcast" element={<Podcast />} />
