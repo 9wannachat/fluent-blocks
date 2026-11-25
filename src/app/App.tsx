@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { BookOpen, LayoutGrid, LibraryBig, PencilLine, Settings as SettingsIcon } from 'lucide-react'
 import { useOffline } from './useOffline'
-import { Heading, Missing } from '../components/ui'
+import { ThemeSwitcher, useThemeSync } from './theme'
+import { BackLink, Heading, Missing } from '../components/ui'
 import { Learn, LessonPage, ModuleReview } from '../features/learning/Learn'
 import { Home } from '../features/learning/Home'
 import { Diagnostic } from '../features/learning/Diagnostic'
@@ -26,7 +27,7 @@ const destinations = [
 
 function Navigation({ className, desktop = false }: { className: string; desktop?: boolean }) {
   return <nav className={className} aria-label="เมนูหลัก">{destinations.map(({ title, en, to, icon: Icon }) =>
-    <Button asChild variant="ghost" key={to}><NavLink end={to === '/'} to={to}><Icon size={desktop ? 19 : 20} aria-hidden="true" /><span>{title}<small lang="en">{en}</small></span></NavLink></Button>)}</nav>
+    <Button asChild variant="ghost" key={to}><NavLink end={to === '/'} to={to}><Icon size={desktop ? 18 : 20} aria-hidden="true" /><span>{title}<small lang="en">{en}</small></span></NavLink></Button>)}</nav>
 }
 
 function Connection() {
@@ -47,11 +48,12 @@ function Connection() {
 
 export function App() {
   const { pathname } = useLocation()
+  useThemeSync()
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [pathname])
   return <div className="shell">
     <a className="skip-link" href="#main">ข้ามไปเนื้อหา</a>
     <header className="mobile-header"><Brand /><Button asChild variant="outline" size="icon"><Link to="/settings" aria-label="ตั้งค่า"><SettingsIcon size={21} /></Link></Button></header>
-    <aside className="sidebar"><Brand /><Separator className="sidebar-divider" /><Navigation className="side-nav" desktop /><Button asChild variant="outline"><NavLink className="side-settings" to="/settings"><SettingsIcon size={19} aria-hidden="true" /><span>ตั้งค่า<small lang="en">Settings</small></span></NavLink></Button></aside>
+    <aside className="sidebar"><Brand /><Separator className="sidebar-divider" /><Navigation className="side-nav" desktop /><div className="sidebar-footer"><Button asChild variant="ghost"><NavLink className="side-settings" to="/settings"><SettingsIcon size={18} aria-hidden="true" /><span>ตั้งค่า<small lang="en">Settings</small></span></NavLink></Button><ThemeSwitcher compact className="side-theme" /></div></aside>
     <main className="main" id="main" tabIndex={-1}>
       <Connection />
       <Routes>
@@ -61,7 +63,7 @@ export function App() {
         <Route path="/learn/module/:moduleId/review" element={<ModuleReview />} />
         <Route path="/learn/:lessonId" element={<LessonPage key={pathname} />} />
         <Route path="/practice" element={<Practice />} />
-        <Route path="/practice/builder" element={<div className="stack page"><Link to="/practice">← ฝึกใช้</Link><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" /><Builder /></div>} />
+        <Route path="/practice/builder" element={<div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" /><Builder /></div>} />
         <Route path="/practice/decision" element={<DecisionLab />} />
         <Route path="/practice/connectors" element={<ConnectorLab />} />
         <Route path="/practice/podcast" element={<Podcast />} />

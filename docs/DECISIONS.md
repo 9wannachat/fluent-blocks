@@ -1,7 +1,7 @@
 # Decisions
 
 - React, strict TypeScript and Vite on npm. Node is pinned in .nvmrc. The lockfile pins compatible dependencies.
-- The dark-only design uses a near-black background, charcoal surfaces, and a blue action palette. All routes share local shadcn/ui components for controls, cards, tabs, disclosure, navigation actions and feedback. Forms use the shadcn Native Select where browser-native selection fits. Legacy theme values still round-trip in backups.
+- The app has light, dark and system themes. Dark is the default. The saved theme lives in the settings record and is mirrored to localStorage so index.html paints it before React loads. React applies it only after IndexedDB answers, which prevents a flash to the default. Both palettes use a clear, saturated blue (#2563eb actions) and must pass axe contrast checks. The dark palette uses a near-black background and charcoal surfaces. All routes share local shadcn/ui components for controls, cards, tabs, disclosure, navigation actions and feedback. Forms use the shadcn Native Select where browser-native selection fits. Theme values round-trip in backups.
 - The curriculum uses structured TypeScript data modules with Zod runtime validation. Content and IDs can be edited separately from React. Stable IDs tie learner data to the curriculum across builds.
 - Sentence construction uses a finite grammar and authored verb bank. Alternatives and open-response rubrics are authored. An unrecognized answer in a free production exercise can be self-assessed without lowering deterministic accuracy.
 - Exercise attempts aggregate by objective. Completion represents the learner marking a lesson read. It is tracked independently of practice and self-assessment.
@@ -12,3 +12,5 @@
 - A wrong graded answer is recorded as an attempt and stays editable for an in-place retry. Each retry check is recorded too. Reveal or a correct answer locks the exercise until ลองใหม่. Authored targeted feedback is shown on the first miss. Generic feedback never contains the model answer.
 - Overview is a primary destination on every breakpoint. Lesson section labels have compact forms in lesson-sections.ts. The compact form is chosen with a container query on the tabs, so the sidebar width is taken into account. The full label is kept as visually hidden text for assistive technology and tests.
 - Sentence Builder uses a radio-group of chips for option sets of up to about a dozen short items. Arrow keys move between chips. The long intention list stays a native select. Dashboard cards show an explanatory empty state rather than zero metrics.
+- Type is kept light for Thai text. Headings use weights of 600–620, body text 1.7 line height, and no negative tracking. Pages and panels use generous spacing, and lesson lists are full-row links rather than underlined text.
+- Buttons, chips, the theme switcher and navigation items use pill radii. Cards and inputs keep their softer rectangular corners.

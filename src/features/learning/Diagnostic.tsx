@@ -1,7 +1,7 @@
 import { Button } from '../../components/ui/button'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heading, Panel } from '../../components/ui'
+import { BackLink, Heading, Panel } from '../../components/ui'
 import { lessonById } from '../../content'
 import { Exercise } from '../practice/Exercise'
 
@@ -36,7 +36,7 @@ export function Diagnostic() {
   options.push(...options.splice(0, index % options.length))
   const missed = [...new Map(items.flatMap(([lesson, skill], index) => results[index] === false ? [[lesson, skill] as const] : [])).entries()]
   function restart() { setResults({}); setIndex(0); setFinished(false); setSession(session + 1) }
-  return <div className="stack page"><Link to="/learn">← เส้นทางการเรียน</Link>
+  return <div className="stack page"><BackLink to="/learn">เส้นทางการเรียน</BackLink>
     <Heading label="DIAGNOSTIC" title="สำรวจทักษะที่อยากฝึก" detail="ใช้ผลเพื่อเลือกบทเรียนที่เหมาะกับคุณ และเลือกเปลี่ยนเองได้ทุกเมื่อ" />
     {finished ? <Panel className="stack"><h2>บทที่แนะนำ</h2>
       {missed.length === 0 ? <p>ทำชุดนี้ได้ครบ ลองเลือกบทที่ท้าทายขึ้นหรือไปฝึกพูดในสถานการณ์จริง</p> :

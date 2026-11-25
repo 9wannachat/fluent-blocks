@@ -62,7 +62,7 @@ test('diagnostic recommends missed objectives and can be taken again', async ({ 
   await page.goto('/learn/diagnostic')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('สำรวจทักษะที่อยากฝึก')
   for (let i = 0; i < 18; i++) {
-    await page.getByRole('radio').nth(i === 0 ? 1 : (3 - (i % 3)) % 3).click()
+    await page.getByRole('radiogroup', { name: 'ตัวเลือกคำตอบ' }).getByRole('radio').nth(i === 0 ? 1 : (3 - (i % 3)) % 3).click()
     await page.getByRole('button', { name: 'ตรวจคำตอบ' }).click()
     await page.getByRole('button', { name: i === 17 ? 'ดูบทที่แนะนำ' : 'ข้อต่อไป' }).click()
   }
@@ -105,6 +105,28 @@ test('dashboard stays dark and accessible across desktop and mobile', async ({ p
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
     expect(results.violations.map(({ id }) => id)).toEqual([])
   }
+})
+
+test('theme switcher applies light, system and dark and survives reload', async ({ page }) => {
+  await page.goto('/settings')
+  const html = page.locator('html')
+  await expect(html).toHaveAttribute('data-theme', 'dark')
+  await page.getByRole('radiogroup', { name: 'ธีม' }).first().getByRole('radio', { name: 'สว่าง' }).click()
+  await expect(html).toHaveAttribute('data-theme', 'light')
+  await expect(html).toHaveCSS('color-scheme', 'light')
+  await page.reload()
+  await expect(html).toHaveAttribute('data-theme', 'light')
+  for (const path of ['/', '/learn', '/learn/m2-06', '/practice/builder']) {
+    await page.goto(path)
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+    expect(results.violations.map(({ id }) => id)).toEqual([])
+  }
+  await page.goto('/settings')
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.getByRole('radiogroup', { name: 'ธีม' }).first().getByRole('radio', { name: 'ตามระบบ' }).click()
+  await expect(html).toHaveAttribute('data-theme', 'dark')
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(html).toHaveAttribute('data-theme', 'light')
 })
 
 test('mobile navigation reaches the overview and keeps lesson sections on one row', async ({ page }) => {

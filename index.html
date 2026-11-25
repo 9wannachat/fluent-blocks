@@ -1,9 +1,20 @@
 <!doctype html>
-<html lang="th" class="dark">
+<html lang="th" class="dark" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0D10" />
+    <script>
+      (function () {
+        try {
+          var preference = localStorage.getItem('fluent-blocks-theme') || 'dark'
+          var dark = preference === 'dark' || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.dataset.theme = dark ? 'dark' : 'light'
+          root.classList.toggle('dark', dark)
+        } catch (error) {}
+      })()
+    </script>
     <title>Fluent Blocks · ฝึกพูดภาษาอังกฤษ</title>
   </head>
   <body>

@@ -48,7 +48,7 @@ export const db = new StudyDatabase();
 
 export const defaultSettings: Settings = {
   id: 'preferences',
-  theme: 'system',
+  theme: 'dark',
   voiceURI: '',
   speechRate: 1,
   routineMinutes: [5, 8, 7, 5, 5],

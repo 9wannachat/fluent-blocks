@@ -51,3 +51,14 @@ The mobile bottom navigation now has four destinations, with Overview first, mat
 ## Home and Practice
 
 Home's resume bar now reads as a position in the lesson, for example ส่วน 3 จาก 4 · ลองฝึก, rather than a score. Before any lesson is marked read, the progress ring is replaced by the curriculum size and a prompt to use บันทึกว่าอ่านจบ. Before any attempt, the practice results card explains what it will show and links to Practice, instead of showing zero counts. Practice tool cards drop the link underline and highlight the whole card on hover. In Sentence Builder, sentence type, subject, predicate and modifier are tappable chips that show English with the Thai gloss. Intention stays a native select because it has 17 long Thai options. Vitest passed 28 tests and Playwright passed 28 checks on Chromium and WebKit, including axe.
+
+## Themes, palette and density
+
+The app now has light, system and dark themes. They can be switched from the sidebar and from Settings. Dark remains the default. The blue is now a clear, saturated #2563eb for actions, with matching accent tones in each theme. A lighter type scale reduces heading sizes and weights and drops negative tracking. Spacing is larger and content is narrower, and the desktop sidebar is a compact single-line list. The Learn page lists lessons as full-row links with a number or done marker, the English title, a status badge and duration, plus a per-module read count. Vitest passed 28 tests and Playwright passed 30 checks on Chromium and WebKit, including axe on the main routes in light mode.
+
+The desktop sidebar is reduced to an icon and a Thai label per row, with English kept as the accessible name. Settings and a compact theme switcher share one footer row. Spaced review is now the sixth Practice card instead of a trailing underlined link.
+
+Follow-up polish: The Learn page's 12-week plan is a compact card with an expandable six-step grid. Reference pattern rows are full-row links, with slot placeholders shown as chips and a register badge. Topic and lesson lists in Reference use the same row style. Sentence Builder controls are numbered steps (label column and pill chips), with a sticky sentence preview. Word-role cards are equal height. The theme now follows the localStorage mirror when no settings record exists, and it listens for OS changes from mount, which closes two reload and race gaps. Playwright passed 30 checks on Chromium and WebKit.
+Buttons across the app, including icon buttons, are now pill-shaped.
+Back links on every subpage use a shared BackLink pill with an arrow icon instead of an underlined ← text link.
+The mobile tab bar now shows an icon and a single Thai label, with the active icon in a soft pill on a translucent bar. English stays as the accessible name.

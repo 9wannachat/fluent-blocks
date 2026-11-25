@@ -4,16 +4,26 @@ import { Disclosure } from '../../components/ui/disclosure'
 import { AlertMessage } from '../../components/ui/alert-message'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowRight, Bookmark, Check, Clock3 } from 'lucide-react'
+import { ArrowRight, Bookmark, CalendarRange, Check, ChevronDown, ChevronRight, Clock3 } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../components/ui/collapsible'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { curriculum, lessonById, patternById } from '../../content'
 import { modules } from '../../content/modules'
 import { db, updateProgress } from '../../storage'
 import { lessonSections as sections, lessonSectionsShort } from './lesson-sections'
-import { Example, Heading, Missing, Panel } from '../../components/ui'
+import { BackLink, Example, Heading, Missing, Panel } from '../../components/ui'
 import { Exercise } from '../practice/Exercise'
 
 const orderedLessons = [...curriculum.lessons].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }))
+
+const studyPlan = [
+  ['1–2', 'โครงประโยคและทบทวนพื้นฐานที่ยังติดขัด'],
+  ['3–4', 'กริยาช่วย คำถาม และมุมมองต่อเวลา'],
+  ['5–6', 'ตำแหน่งคำและการเชื่อมเหตุผล'],
+  ['7–8', 'กลุ่มคำที่ใช้จริงและการขยายประโยค'],
+  ['9–10', 'เก็บประโยคจากพอดแคสต์และลองเล่าใหม่'],
+  ['11–12', 'ฝึกคุยตามสถานการณ์และย้อนทบทวน'],
+] as const
 
 export function Learn() {
   const progress = useLiveQuery(() => db.progress.toArray(), []) ?? []
@@ -21,27 +31,39 @@ export function Learn() {
   return <div className="stack page">
     <Heading label="LEARN" title="เส้นทางการเรียน" detail="เลือกหัวข้อที่อยากใช้จริง หรือกลับมาทบทวนพื้นฐานได้ทุกเมื่อ" />
     <Button asChild variant="outline"><Link to="/learn/diagnostic">สำรวจทักษะและเลือกบทเริ่มต้น <ArrowRight size={16} /></Link></Button>
-    <Panel><Disclosure title="แผนเรียนแบบยืดหยุ่น 12 สัปดาห์">
-      <ul>
-        <li>สัปดาห์ 1–2 · โครงประโยคและทบทวนพื้นฐานที่ยังติดขัด</li>
-        <li>สัปดาห์ 3–4 · กริยาช่วย คำถาม และมุมมองต่อเวลา</li>
-        <li>สัปดาห์ 5–6 · ตำแหน่งคำและการเชื่อมเหตุผล</li>
-        <li>สัปดาห์ 7–8 · กลุ่มคำที่ใช้จริงและการขยายประโยค</li>
-        <li>สัปดาห์ 9–10 · เก็บประโยคจากพอดแคสต์และลองเล่าใหม่</li>
-        <li>สัปดาห์ 11–12 · ฝึกคุยตามสถานการณ์และย้อนทบทวน</li>
-      </ul>
-      <p>เลือกข้ามบทที่ทำได้แล้ว และย้อนฝึกทักษะที่ติดขัดจากหน้าหลักได้ทุกสัปดาห์</p>
-    </Disclosure></Panel>
+    <Collapsible asChild><Panel className="plan-panel">
+      <div className="plan-head">
+        <span className="plan-icon" aria-hidden="true"><CalendarRange size={20} /></span>
+        <div><h2>แผนเรียนแบบยืดหยุ่น 12 สัปดาห์</h2><p>6 ช่วง ช่วงละ 2 สัปดาห์ ข้ามบทที่ทำได้แล้วได้</p></div>
+        <CollapsibleTrigger asChild><Button type="button" variant="outline" className="plan-toggle">ดูแผน <ChevronDown aria-hidden="true" /></Button></CollapsibleTrigger>
+      </div>
+      <CollapsibleContent>
+        <ol className="plan-steps">{studyPlan.map(([weeks, focus]) => <li key={weeks}><strong>สัปดาห์ {weeks}</strong><span>{focus}</span></li>)}</ol>
+        <p className="plan-note">เลือกข้ามบทที่ทำได้แล้ว และย้อนฝึกทักษะที่ติดขัดจากหน้าหลักได้ทุกสัปดาห์</p>
+      </CollapsibleContent>
+    </Panel></Collapsible>
     {saved.length > 0 && <Panel><h2>บุ๊กมาร์ก</h2><ul>{saved.map(({ lessonId }) => <li key={lessonId}><Link to={`/learn/${lessonId}`}>{lessonById.get(lessonId)?.titleTh}</Link></li>)}</ul></Panel>}
     {modules.filter((module) => orderedLessons.some((lesson) => lesson.module === module.id)).map((module) => {
       const lessons = orderedLessons.filter((lesson) => lesson.module === module.id)
-      return <Panel key={module.id}>
-        <p className="eyebrow" lang="en">{module.en}</p><h2>{module.th}</h2>
-        <ul className="clean">{lessons.map((lesson) => <li className="row" key={lesson.id}>
-          <Link to={`/learn/${lesson.id}`}>{lesson.titleTh}</Link>
-          <span className="inline muted">{progress.some((entry) => entry.lessonId === lesson.id && entry.completed) && <Check size={15} aria-label="อ่านจบแล้ว" />} {lesson.minutes} นาที</span>
-        </li>)}</ul>
-        <Link to={`/learn/module/${module.id}/review`}>ทบทวนท้ายหมวด <ArrowRight size={15} /></Link>
+      const done = lessons.filter((lesson) => progress.some((entry) => entry.lessonId === lesson.id && entry.completed)).length
+      return <Panel key={module.id} className="module-panel">
+        <div className="module-heading">
+          <div><p className="eyebrow" lang="en">{module.en}</p><h2>{module.th}</h2></div>
+          <span className="module-count">อ่านจบ <strong>{done}/{lessons.length}</strong></span>
+        </div>
+        <ol className="clean lesson-list">{lessons.map((lesson, index) => {
+          const entry = progress.find((item) => item.lessonId === lesson.id)
+          const status = entry?.completed ? 'done' : entry ? 'started' : 'new'
+          return <li key={lesson.id}>
+            <Link className={`lesson-row ${status}`} to={`/learn/${lesson.id}`}>
+              <span className="lesson-index" aria-hidden="true">{status === 'done' ? <Check size={14} /> : index + 1}</span>
+              <span className="lesson-text"><span className="lesson-title">{lesson.titleTh}</span><small lang="en">{lesson.titleEn}</small></span>
+              <span className="lesson-meta">{status === 'done' ? <span className="lesson-badge">อ่านจบแล้ว</span> : status === 'started' ? <span className="lesson-badge started">กำลังเรียน</span> : null}<span>{lesson.minutes} นาที</span></span>
+              <ChevronRight className="lesson-chevron" size={18} aria-hidden="true" />
+            </Link>
+          </li>
+        })}</ol>
+        <Button asChild variant="outline" className="module-review"><Link to={`/learn/module/${module.id}/review`}>ทบทวนท้ายหมวด <ArrowRight size={15} /></Link></Button>
       </Panel>
     })}
   </div>
@@ -66,7 +88,7 @@ export function LessonPage() {
   }
 
   return <div className="stack page">
-    <Link to="/learn">← เส้นทางการเรียน</Link>
+    <BackLink to="/learn">เส้นทางการเรียน</BackLink>
     <Heading label={lesson.titleEn} title={lesson.titleTh} detail={lesson.hook} />
     <div className="actions">
       <Button type="button" variant="outline" aria-pressed={progress?.bookmarked ?? false} onClick={() => void save({ bookmarked: !progress?.bookmarked })}><Bookmark size={17} />{progress?.bookmarked ? 'บุ๊กมาร์กแล้ว' : 'บุ๊กมาร์ก'}</Button>
@@ -117,7 +139,7 @@ export function ModuleReview() {
   const module = modules.find((item) => String(item.id) === moduleId)
   const items = orderedLessons.filter((lesson) => lesson.module === module?.id)
   if (!module || items.length === 0) return <Missing />
-  return <div className="stack page"><Link to="/learn">← เส้นทางการเรียน</Link><Heading label={module.en} title={`ทบทวน ${module.th}`} detail="ลองดึงสิ่งที่เรียนกลับมาใช้จากความจำ แล้วอธิบายให้ตัวเองฟังว่าทำไมจึงเลือกแบบนี้" />
+  return <div className="stack page"><BackLink to="/learn">เส้นทางการเรียน</BackLink><Heading label={module.en} title={`ทบทวน ${module.th}`} detail="ลองดึงสิ่งที่เรียนกลับมาใช้จากความจำ แล้วอธิบายให้ตัวเองฟังว่าทำไมจึงเลือกแบบนี้" />
     {items.map((lesson) => <Panel key={lesson.id}><h2>{lesson.titleTh}</h2><Exercise item={lesson.exercises.at(-1)!} objective={lesson.id} /></Panel>)}
   </div>
 }

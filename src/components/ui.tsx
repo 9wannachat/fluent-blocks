@@ -1,7 +1,7 @@
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
-import { Volume2 } from 'lucide-react'
+import { ArrowLeft, Volume2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../storage'
@@ -58,4 +58,9 @@ export function Example({ en, th, note }: { en: string; th: string; note?: strin
     <div>{th}</div>
     {note && <small>{note}</small>}
   </div>
+}
+
+/** Quiet pill link back to the parent page. */
+export function BackLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return <Link className="back-link" to={to}><ArrowLeft size={16} aria-hidden="true" />{children}</Link>
 }

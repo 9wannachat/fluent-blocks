@@ -5,7 +5,7 @@ import { Disclosure } from '../../components/ui/disclosure'
 import { AlertMessage } from '../../components/ui/alert-message'
 import { useEffect, useRef, useState, type Ref } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Example, Heading, Panel } from '../../components/ui'
+import { BackLink, Example, Heading, Panel } from '../../components/ui'
 import { scenarios, type Scenario } from '../../content/scenarios'
 import { recordAttempt } from '../../storage'
 import { Exercise } from './Exercise'
@@ -138,7 +138,7 @@ export function Conversation() {
   const { scenarioId } = useParams()
   const scenario = scenarios.find(({ id }) => id === scenarioId)
   if (scenario) return <div className="stack page">
-    <Link to={scenarioPath}>← เลือกสถานการณ์</Link>
+    <BackLink to={scenarioPath}>เลือกสถานการณ์</BackLink>
     <Heading label="CONVERSATION LAB" title={scenario.title} detail={scenario.context} />
     <Dialogue key={scenario.id} scenario={scenario} />
   </div>
@@ -147,7 +147,7 @@ export function Conversation() {
     <Link to={scenarioPath}>กลับไปรายการสถานการณ์</Link>
   </div>
   return <div className="stack page">
-    <Link to="/practice">← ฝึกใช้</Link>
+    <BackLink to="/practice">ฝึกใช้</BackLink>
     <Heading label="CONVERSATION LAB" title="ฝึกสนทนา" detail="เลือกสถานการณ์ ลองตอบ แล้วฟังว่าคู่สนทนาอาจถามอะไรต่อ" />
     <div className="grid two">
       {scenarios.map((item) => <Panel className="stack" key={item.id}>

@@ -3,7 +3,7 @@ import { Disclosure } from '../../components/ui/disclosure'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, AudioLines, BookOpenCheck, Cable, MessageCircle, Puzzle, Waypoints } from 'lucide-react'
-import { Heading, Panel, Example } from '../../components/ui'
+import { BackLink, Heading, Panel, Example } from '../../components/ui'
 import { Exercise } from './Exercise'
 
 const tools = [
@@ -12,6 +12,7 @@ const tools = [
   { title: 'ขยายและเชื่อมประโยค', en: 'Connector Lab', detail: 'ลองย้ายคำ เปลี่ยนจุดเน้น และเชื่อมความคิด', route: 'connectors', icon: Cable },
   { title: 'ฝึกสนทนา', en: 'Conversation Lab', detail: 'ตอบคำถาม ฟังเหตุผล และต่อบทสนทนา', route: 'conversation', icon: MessageCircle },
   { title: 'สมุดพอดแคสต์', en: 'Podcast Lab', detail: 'เก็บประโยคที่ฟังแล้วนำไปพูดในบริบทของคุณ', route: 'podcast', icon: AudioLines },
+  { title: 'ทบทวนจากความจำ', en: 'Spaced Review', detail: 'นึกรูปประโยคที่ถึงกำหนดทบทวน แล้วให้คะแนนว่าจำได้แค่ไหน', route: '/review', icon: BookOpenCheck },
 ]
 
 export function Practice() {
@@ -19,7 +20,7 @@ export function Practice() {
     <div className="grid two">{tools.map(({ title, en, detail, route, icon: Icon }) => <Panel className="lab-link" key={route}>
       <span className="lab-icon"><Icon size={22} /></span><span className="eyebrow" lang="en">{en}</span>
       <h2><Link to={route}>{title}</Link></h2><p>{detail}</p><ArrowRight className="lab-arrow" size={18} />
-    </Panel>)}</div><Link to="/review"><BookOpenCheck size={17} /> ทบทวนรูปแบบจากความจำ</Link></div>
+    </Panel>)}</div></div>
 }
 
 const decisions = [
@@ -36,7 +37,7 @@ const decisions = [
 export function DecisionLab() {
   const [selected, setSelected] = useState<number | null>(null)
   const item = selected === null ? null : decisions[selected]
-  return <div className="stack page"><Link to="/practice">← ฝึกใช้</Link><Heading label="DECISION LAB" title="คุณอยากสื่ออะไร" detail="ลองเลือกความหมายก่อน แล้วเลือกประโยคที่เหมาะกับสถานการณ์" />
+  return <div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="DECISION LAB" title="คุณอยากสื่ออะไร" detail="ลองเลือกความหมายก่อน แล้วเลือกประโยคที่เหมาะกับสถานการณ์" />
     <Panel className="stack"><h2>เลือกเจตนา</h2><div className="actions">{decisions.map((decision, index) => <Button type="button" variant="outline" aria-pressed={selected === index} key={decision.id} onClick={() => setSelected(index)}>{decision.label}</Button>)}</div></Panel>
     {item && <Panel className="stack"><h2>{item.label}</h2><Exercise key={item.id} objective={item.id} item={{ id: `decision-${item.id}`, kind: 'auxiliary', prompt: item.th, options: item.choices, answers: [item.example], hint: 'ลองหาส่วนที่บอกเวลาและความหมายก่อน แล้วดูว่ากริยาหลักต้องใช้รูปอะไร', explanation: item.reason, feedback: Object.fromEntries(item.choices.filter((choice) => choice !== item.example).map((choice) => [choice, item.reason])) }} />
     <Disclosure title="ลองตอบสั้นและถามต่อ"><p lang="en">{item.short} · {item.follow}</p></Disclosure><Link to="/practice/builder">ลองสร้างรูปอื่นใน Sentence Builder <ArrowRight size={16} /></Link></Panel>}
@@ -69,7 +70,7 @@ export function ConnectorLab() {
   const [connector, setConnector] = useState(0)
   const [placement, setPlacement] = useState(0)
   const current = expansion[step]
-  return <div className="stack page"><Link to="/practice">← ฝึกใช้</Link><Heading label="CONNECTOR LAB" title="ค่อย ๆ ต่อความคิดให้เป็นประโยค" />
+  return <div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="CONNECTOR LAB" title="ค่อย ๆ ต่อความคิดให้เป็นประโยค" />
     <Panel className="stack"><h2>ขยายจากประโยคหลัก</h2><Example en={current.text} th={current.th} note={current.note} />
       <div className="actions"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>ย้อนขั้น</Button><Button type="button" disabled={step === expansion.length - 1} onClick={() => setStep(step + 1)}>เติมอีกหนึ่งส่วน</Button><span aria-live="polite">{step + 1}/{expansion.length}</span></div>
       <p>เลือกเฉพาะส่วนที่มีประโยชน์กับสิ่งที่พูดได้ในแต่ละครั้ง</p>

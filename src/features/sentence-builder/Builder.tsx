@@ -1,6 +1,6 @@
 import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
 import { Label } from '../../components/ui/label'
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { Checkbox } from '../../components/ui/checkbox'
 import { Panel, Speak } from '../../components/ui'
@@ -23,31 +23,45 @@ const roleLabels: Record<Role, { en: string; th: string }> = {
 
 type SelectOption<T extends string> = { value: T; label: string }
 
-function BuilderSelect<T extends string>({
-  label, value, options, onChange,
-}: {
-  label: string; value: T; options: SelectOption<T>[]; onChange: (value: T) => void
+/** One numbered step: label on the left, control on the right (stacked on narrow screens). */
+function BuilderRow({ step, label, labelFor, labelId, children }: {
+  step: number; label: string; labelFor?: string; labelId?: string; children: ReactNode
 }) {
   return (
-    <Label className="stack builder-field">
-      <span>{label}</span>
-      <NativeSelect value={value} onChange={(event) => onChange(event.target.value as T)}>
+    <div className="builder-row">
+      <div className="builder-row-label">
+        <span className="builder-step" aria-hidden="true">{step}</span>
+        {labelFor ? <label htmlFor={labelFor}>{label}</label> : <span id={labelId}>{label}</span>}
+      </div>
+      <div className="builder-row-control">{children}</div>
+    </div>
+  )
+}
+
+function BuilderSelect<T extends string>({
+  step, label, value, options, onChange,
+}: {
+  step: number; label: string; value: T; options: SelectOption<T>[]; onChange: (value: T) => void
+}) {
+  const id = useId()
+  return (
+    <BuilderRow step={step} label={label} labelFor={id}>
+      <NativeSelect id={id} value={value} onChange={(event) => onChange(event.target.value as T)}>
         {options.map((option) => <NativeSelectOption key={option.value} value={option.value}>{option.label}</NativeSelectOption>)}
       </NativeSelect>
-    </Label>
+    </BuilderRow>
   )
 }
 
 /** Tappable blocks for short option sets. Arrow keys move between options. */
 function BuilderChips<T extends string>({
-  label, value, options, onChange,
+  step, label, value, options, onChange,
 }: {
-  label: string; value: T; options: SelectOption<T>[]; onChange: (value: T) => void
+  step: number; label: string; value: T; options: SelectOption<T>[]; onChange: (value: T) => void
 }) {
   const id = useId()
   return (
-    <div className="stack builder-field builder-chips-field">
-      <span id={id} className="builder-field-label">{label}</span>
+    <BuilderRow step={step} label={label} labelId={id}>
       <RadioGroupPrimitive.Root className="builder-chips" aria-labelledby={id} value={value}
         onValueChange={(next) => onChange(next as T)} orientation="horizontal">
         {options.map((option) => {
@@ -59,7 +73,7 @@ function BuilderChips<T extends string>({
           )
         })}
       </RadioGroupPrimitive.Root>
-    </div>
+    </BuilderRow>
   )
 }
 
@@ -98,23 +112,23 @@ export function Builder() {
           <Speak text={result.english} />
         </div>
       </Panel>
-      <Panel className="stack builder-controls" aria-label="ตัวเลือกสร้างประโยค">
-        <BuilderSelect label="เจตนา" value={input.intention} options={intentionOptions}
+      <Panel className="builder-controls" aria-label="ตัวเลือกสร้างประโยค">
+        <BuilderSelect step={1} label="เจตนา" value={input.intention} options={intentionOptions}
           onChange={(intention) => update({ intention })} />
-        <BuilderChips label="ชนิดประโยค" value={input.kind} options={kinds}
+        <BuilderChips step={2} label="ชนิดประโยค" value={input.kind} options={kinds}
           onChange={(kind) => update({ kind })} />
         {input.kind === 'whSubject'
-          ? <p>ใช้ <strong lang="en">who</strong> เป็นประธาน เพราะกำลังถามว่าใครเป็นคนทำหรืออยู่ในสภาพนั้น</p>
-          : <BuilderChips label="ประธาน" value={input.subject} options={subjectOptions}
+          ? <BuilderRow step={3} label="ประธาน"><p className="builder-note">ใช้ <strong lang="en">who</strong> เป็นประธาน เพราะกำลังถามว่าใครเป็นคนทำหรืออยู่ในสภาพนั้น</p></BuilderRow>
+          : <BuilderChips step={3} label="ประธาน" value={input.subject} options={subjectOptions}
               onChange={(subject) => update({ subject })} />}
-        <BuilderChips label="กริยาหรือส่วนเติมเต็ม" value={input.predicate}
+        <BuilderChips step={4} label="กริยาหรือส่วนเติมเต็ม" value={input.predicate}
           options={predicateOptions(input.intention, input.kind, input.subject)}
           onChange={(predicate) => update({ predicate })} />
-        <BuilderChips label="คำขยาย" value={input.modifier} options={modifierOptions(input)}
+        <BuilderChips step={5} label="คำขยาย" value={input.modifier} options={modifierOptions(input)}
           onChange={(modifier) => update({ modifier })} />
         <Label className="builder-toggle">
           <Checkbox checked={input.contract} onCheckedChange={(checked) => update({ contract: checked === true })} />
-          <span>แสดงรูปย่อเมื่อใช้ได้</span>
+          <span>แสดงรูปย่อเมื่อใช้ได้ <span className="muted" lang="en">(She’s, don’t)</span></span>
         </Label>
       </Panel>
       <Panel className="stack" aria-labelledby="builder-sentence">

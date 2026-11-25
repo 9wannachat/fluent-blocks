@@ -12,6 +12,7 @@ import {
   type BackupPreview, type Settings as Preferences,
 } from '../../storage'
 import type { BackupKey } from '../../storage/schema'
+import { ThemeSwitcher } from '../../app/theme'
 
 const routineLabels = ['ทบทวนจากความจำ', 'อ่านบทเรียน', 'สร้างประโยค', 'วิเคราะห์สิ่งที่ฟัง', 'พูดหรือเล่าใหม่']
 const backupLabels: Record<BackupKey, string> = {
@@ -188,7 +189,8 @@ export function Settings() {
   const preferences = useLiveQuery(async () => (await db.settings.get('preferences')) ?? defaultSettings, [])
   return <div className="stack page">
     <Heading title="การตั้งค่า" detail="ปรับจังหวะเรียน เลือกเสียง และสำรองข้อมูลของคุณ" />
-    {preferences ? <PreferencesForm key={JSON.stringify(preferences)} preferences={preferences} onSaved={() => setSaved(true)} /> : <p role="status">กำลังเปิดการตั้งค่า</p>}
+    <Panel className="stack"><h2>ธีม</h2><p className="muted">เลือกโหมดสว่าง มืด หรือให้เปลี่ยนตามการตั้งค่าของอุปกรณ์</p><ThemeSwitcher /></Panel>
+    {preferences ? <PreferencesForm key={JSON.stringify([preferences.voiceURI, preferences.speechRate, preferences.routineMinutes])} preferences={preferences} onSaved={() => setSaved(true)} /> : <p role="status">กำลังเปิดการตั้งค่า</p>}
     {saved && <p role="status">บันทึกการตั้งค่าแล้ว</p>}
     <BackupPanel onImport={() => setSaved(false)} />
     <Panel><h2>เพิ่มไว้ที่หน้าจอโฮม</h2><p>บน iPhone เปิด Fluent Blocks ใน Safari แตะปุ่มแชร์ แล้วเลือก Add to Home Screen หลังเปิดแอปครั้งแรก ให้รอข้อความว่าพร้อมใช้งานออฟไลน์ก่อนออกจากเครือข่าย</p></Panel>

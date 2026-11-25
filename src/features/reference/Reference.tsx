@@ -3,14 +3,14 @@ import { Input } from '../../components/ui/input'
 import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
 import { Label } from '../../components/ui/label'
 import { AlertMessage } from '../../components/ui/alert-message'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
 import MiniSearch from 'minisearch'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { curriculum, lessonById, patternById } from '../../content'
 import { modules } from '../../content/modules'
-import { Example, Heading, Missing, Panel } from '../../components/ui'
+import { BackLink, Example, Heading, Missing, Panel } from '../../components/ui'
 import { db, enqueuePattern, ratePattern } from '../../storage'
 import { localDateKey } from '../../domain/review'
 import type { Pattern } from '../../domain/content'
@@ -49,8 +49,22 @@ const glossary = [
   ['not really / just a little bit', 'ไม่ค่อย / แค่นิดเดียว', 'Do you cook often? Not really. พูดเป็นคำตอบสั้นได้'],
 ] as const
 
+/** Shows slot placeholders such as [subject] as quiet chips inside the English template. */
+function Template({ text }: { text: string }) {
+  return <>{text.split(/(\[[^\]]+\])/).filter(Boolean).map((part, index) =>
+    part.startsWith('[') ? <span className="slot" key={index}>{part.slice(1, -1)}</span> : <span key={index}>{part}</span>)}</>
+}
+
 function PatternRow({ pattern }: { pattern: Pattern }) {
-  return <li className="row"><div><Link lang="en" to={`/reference/pattern/${pattern.id}`}>{pattern.template}</Link><p className="muted">{pattern.meaning}</p></div><small>{registerLabels[pattern.register]}</small></li>
+  return <li><Link className="lesson-row pattern-row" to={`/reference/pattern/${pattern.id}`} aria-label={`${pattern.template} · ${pattern.meaning}`}>
+    <span className="lesson-text"><span className="lesson-title" lang="en"><Template text={pattern.template} /></span><small>{pattern.meaning}</small></span>
+    <span className="lesson-meta"><span className={`register register-${pattern.register}`}>{registerLabels[pattern.register]}</span></span>
+    <ChevronRight className="lesson-chevron" size={18} aria-hidden="true" />
+  </Link></li>
+}
+
+function RowLink({ to, children }: { to: string; children: ReactNode }) {
+  return <li><Link className="lesson-row" to={to}><span className="lesson-text"><span className="lesson-title">{children}</span></span><ChevronRight className="lesson-chevron" size={18} aria-hidden="true" /></Link></li>
 }
 
 export function Reference() {
@@ -78,11 +92,11 @@ export function Reference() {
       <div className="actions"><Button asChild variant="outline"><Link to="/reference/notebook">สมุดคำศัพท์</Link></Button><Button asChild variant="outline"><Link to="/review">ทบทวน</Link></Button></div>
     </Panel>
     <Panel className="stack"><h2>รูปประโยค <small aria-live="polite">{shown.length} รูปแบบ</small></h2>
-      {shown.length ? <ul className="clean">{shown.slice(0, limit).map((pattern) => <PatternRow pattern={pattern} key={pattern.id} />)}</ul> : <p>ไม่พบรูปประโยค ลองค้นคำสั้นลงหรือเลือกทุกเจตนา</p>}
+      {shown.length ? <ul className="clean lesson-list">{shown.slice(0, limit).map((pattern) => <PatternRow pattern={pattern} key={pattern.id} />)}</ul> : <p>ไม่พบรูปประโยค ลองค้นคำสั้นลงหรือเลือกทุกเจตนา</p>}
       {shown.length > limit && <Button type="button" variant="outline" onClick={() => setLimit(limit + 24)}>แสดงเพิ่ม</Button>}
     </Panel>
     {terms.length > 0 && <Panel className="stack"><h2>คำและวลีที่ควรรู้</h2>{terms.map(([en, th, note]) => <Example key={en} en={en} th={th} note={note} />)}</Panel>}
-    <Panel className="stack"><h2>หัวข้อไวยากรณ์</h2><ul className="clean">{modules.filter((module) => curriculum.lessons.some((lesson) => lesson.module === module.id)).map((module) => <li className="row" key={module.id}><Link to={`/reference/topics/${module.id}`}>{module.th}</Link></li>)}</ul></Panel>
+    <Panel className="stack"><h2>หัวข้อไวยากรณ์</h2><ul className="clean lesson-list">{modules.filter((module) => curriculum.lessons.some((lesson) => lesson.module === module.id)).map((module) => <RowLink key={module.id} to={`/reference/topics/${module.id}`}>{module.th}</RowLink>)}</ul></Panel>
   </div>
 }
 
@@ -96,7 +110,7 @@ export function PatternPage() {
     setError(false)
     try { await enqueuePattern(patternId) } catch { setError(true) }
   }
-  return <div className="stack page"><Link to="/reference">← คลังรูปประโยค</Link>
+  return <div className="stack page"><BackLink to="/reference">คลังรูปประโยค</BackLink>
     <Heading label={`${pattern.intent} · ${registerLabels[pattern.register]}`} title={pattern.template} detail={pattern.meaning} />
     <Panel className="stack"><h2>ใช้เมื่อไหร่</h2><p>{pattern.why}</p><p>{pattern.placement}</p>
       {pattern.slots.length > 0 && <><h3>คำที่นำมาเติมได้</h3><ul>{pattern.slots.map((slot) => <li key={slot.name}><span lang="en">{slot.name}</span> · {slot.rule} · <span lang="en">{slot.example}</span></li>)}</ul></>}
@@ -118,9 +132,9 @@ export function TopicPage() {
   const lessons = curriculum.lessons.filter((lesson) => lesson.module === module?.id)
   if (!module || !lessons.length) return <Missing />
   const ids = new Set(lessons.map((lesson) => lesson.id))
-  return <div className="stack page"><Link to="/reference">← อ้างอิง</Link><Heading label={module.en} title={module.th} />
-    <Panel className="stack"><h2>บทเรียน</h2><ul className="clean">{lessons.map((lesson) => <li className="row" key={lesson.id}><Link to={`/learn/${lesson.id}`}>{lesson.titleTh}</Link></li>)}</ul></Panel>
-    <Panel className="stack"><h2>รูปประโยคในหัวข้อนี้</h2><ul className="clean">{curriculum.patterns.filter((item) => item.lessons.some((id) => ids.has(id))).map((item) => <PatternRow pattern={item} key={item.id} />)}</ul></Panel>
+  return <div className="stack page"><BackLink to="/reference">อ้างอิง</BackLink><Heading label={module.en} title={module.th} />
+    <Panel className="stack"><h2>บทเรียน</h2><ul className="clean lesson-list">{lessons.map((lesson) => <RowLink key={lesson.id} to={`/learn/${lesson.id}`}>{lesson.titleTh}</RowLink>)}</ul></Panel>
+    <Panel className="stack"><h2>รูปประโยคในหัวข้อนี้</h2><ul className="clean lesson-list">{curriculum.patterns.filter((item) => item.lessons.some((id) => ids.has(id))).map((item) => <PatternRow pattern={item} key={item.id} />)}</ul></Panel>
   </div>
 }
 
