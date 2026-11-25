@@ -54,9 +54,12 @@ export function Speak({ text }: { text: string }) {
 
 export function Example({ en, th, note }: { en: string; th: string; note?: string }) {
   return <div className="example">
-    <div className="inline spread"><strong lang="en">{en}</strong><Speak text={en} /></div>
-    <div>{th}</div>
-    {note && <small>{note}</small>}
+    <div className="example-text">
+      <strong lang="en">{en}</strong>
+      <span className="example-th">{th}</span>
+      {note && <small>{note}</small>}
+    </div>
+    <Speak text={en} />
   </div>
 }
 

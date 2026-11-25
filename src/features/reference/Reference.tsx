@@ -92,7 +92,7 @@ export function Reference() {
       {shown.length ? <ul className="clean lesson-list">{shown.slice(0, limit).map((pattern) => <PatternRow pattern={pattern} key={pattern.id} />)}</ul> : <p>ไม่พบรูปประโยค ลองค้นคำสั้นลงหรือเลือกทุกเจตนา</p>}
       {shown.length > limit && <Button type="button" variant="outline" onClick={() => setLimit(limit + 24)}>แสดงเพิ่ม</Button>}
     </Panel>
-    {terms.length > 0 && <Panel className="stack"><h2>คำและวลีที่ควรรู้</h2>{terms.map(([en, th, note]) => <Example key={en} en={en} th={th} note={note} />)}</Panel>}
+    {terms.length > 0 && <Panel className="stack"><h2>คำและวลีที่ควรรู้</h2><div className="glossary">{terms.map(([en, th, note]) => <Example key={en} en={en} th={th} note={note} />)}</div></Panel>}
     <Panel className="stack"><h2>หัวข้อไวยากรณ์</h2><ul className="clean lesson-list">{modules.filter((module) => curriculum.lessons.some((lesson) => lesson.module === module.id)).map((module) => <RowLink key={module.id} to={`/reference/topics/${module.id}`}>{module.th}</RowLink>)}</ul></Panel>
   </div>
 }

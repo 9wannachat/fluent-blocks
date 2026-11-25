@@ -428,3 +428,19 @@ fieldset { min-width: 0; padding: 0; border: 0 }
 
 .scenario-card h2 { padding-right: 1.75rem }
 .scenario-card p { color: var(--subtle) }
+
+/* Examples: light raised cards, English first, Thai and note quieter, small round audio button. */
+.example { display: grid; gap: .3rem; min-width: 0; padding: .8rem .9rem .8rem 1rem; border: 1px solid var(--line); border-inline-start: 1px solid var(--line); border-radius: .85rem; background: var(--surface-raised); box-shadow: inset 3px 0 0 var(--accent) }
+.example:has(> .example-text) { display: flex; align-items: flex-start; gap: .75rem }
+.example-text { flex: 1; min-width: 0; display: grid; gap: .2rem }
+.example strong { font-size: 1rem; font-weight: 600; line-height: 1.45; color: var(--ink) }
+.example-th { color: var(--subtle); font-size: .92rem }
+.example small { display: block; margin-top: .3rem; color: var(--metadata); font-size: .8rem; line-height: 1.55 }
+.example .audio { flex: none; display: inline-flex; flex-direction: column; align-items: flex-end }
+.example .audio [data-slot="button"] { width: 34px; height: 34px; min-height: 0; border-color: var(--line); background: var(--surface); color: var(--accent) }
+.example .audio [data-slot="button"] svg { width: 16px; height: 16px }
+/* Glossary: a divided list instead of stacked cards. */
+.glossary { display: grid }
+.glossary .example { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; padding: .9rem 0 }
+.glossary .example:first-child { border-top: 0; padding-top: .2rem }
+.example p { color: var(--subtle); font-size: .92rem }

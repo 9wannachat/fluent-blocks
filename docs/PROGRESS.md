@@ -71,3 +71,4 @@ The mobile tab bar now shows an icon and a single Thai label, with the active ic
 - Inputs, selects and text areas share a rounded, raised field style with an accent focus ring and an invalid state.
 - Remaining pages were brought in line. Conversation scenarios are hover cards. Podcast, Notebook and Review have back links. The Review empty state explains how to add patterns. The diagnostic hides "next" until answered. Bookmarks, related lessons and pattern links use the shared RowLink.
 - Vitest passed 30 tests and Playwright passed 30 checks. axe runs in light mode on 16 routes, and a one-off dark sweep of the same routes was clean.
+Examples are lighter raised cards with an inset accent edge, quieter Thai and notes, and a small round audio button. The Reference glossary is a divided list.
