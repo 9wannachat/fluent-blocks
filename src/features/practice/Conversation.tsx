@@ -1,0 +1,159 @@
+import { Checkbox } from '../../components/ui/checkbox'
+import { Button } from '../../components/ui/button'
+import { Label } from '../../components/ui/label'
+import { Disclosure } from '../../components/ui/disclosure'
+import { AlertMessage } from '../../components/ui/alert-message'
+import { useEffect, useRef, useState, type Ref } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { Example, Heading, Panel } from '../../components/ui'
+import { scenarios, type Scenario } from '../../content/scenarios'
+import { recordAttempt } from '../../storage'
+import { Exercise } from './Exercise'
+
+const scenarioPath = '/practice/conversation'
+const criteria = [
+  'คนฟังจับใจความหลักได้',
+  'เลือกกริยาช่วยและรูปกริยาตามความหมาย',
+  'วางคำและส่วนขยายในตำแหน่งที่เข้าใจง่าย',
+  'เชื่อมความคิดตามเหตุผลหรือเหตุการณ์จริง',
+  'ใช้น้ำเสียงและคำที่เหมาะกับคู่สนทนา',
+]
+
+type Branch = Scenario['branches'][number]
+
+function SpeakingTask({ scenario, branch, headingRef }: {
+  scenario: Scenario; branch: Branch; headingRef: Ref<HTMLHeadingElement>
+}) {
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+  async function saveAssessment() {
+    setStatus('saving')
+    try {
+      await recordAttempt({
+        exerciseId: `conversation-${scenario.id}-speaking`,
+        objectiveId: scenario.objectiveId,
+        outcome: 'self-assessed',
+      })
+      setStatus('saved')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  return <Panel className="stack">
+    <h2 ref={headingRef} tabIndex={-1}>ลองพูด {scenario.speaking.seconds} วินาที</h2>
+    <p>{scenario.speaking.task}</p>
+    <p>{scenario.speaking.stress}</p>
+    <Disclosure title="ฟังจากตัวอย่างอีกครั้ง">
+      <Example {...branch.reply} />
+    </Disclosure>
+    <fieldset className="choices" disabled={status === 'saved' || status === 'saving'}>
+      <legend>เช็กด้วยตัวเองหลังพูด</legend>
+      <p>{scenario.speaking.focus}</p>
+      {criteria.map((criterion) => <Label className="choice" key={criterion}>
+        <Checkbox disabled={status !== "idle" && status !== "error"} /><span>{criterion}</span>
+      </Label>)}
+    </fieldset>
+    <div className="actions">
+      <Button type="button" disabled={status === 'saved' || status === 'saving'} onClick={() => void saveAssessment()}>
+        {status === 'saved' ? 'ประเมินตนเองแล้ว' : 'บันทึกว่าประเมินตนเองแล้ว'}
+      </Button>
+    </div>
+    {status === 'error' && <AlertMessage>บันทึกไม่ได้ ลองอีกครั้ง</AlertMessage>}
+    {status === 'saved' && <p role="status">บันทึกการฝึกพูดแล้ว</p>}
+  </Panel>
+}
+
+function Dialogue({ scenario }: { scenario: Scenario }) {
+  const [branch, setBranch] = useState<Branch | null>(null)
+  const [step, setStep] = useState<'first' | 'follow' | 'speak'>('first')
+  const firstHeading = useRef<HTMLHeadingElement>(null)
+  const nextHeading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (step !== 'first') nextHeading.current?.focus()
+  }, [step])
+
+  function reset() {
+    setBranch(null)
+    setStep('first')
+    firstHeading.current?.focus()
+  }
+
+  return <>
+    <Panel className="stack">
+      <h2 ref={firstHeading} tabIndex={-1}>คู่สนทนาเริ่ม</h2>
+      <Example {...scenario.firstTurn} />
+      {step === 'first' && <>
+        <p>ลองตอบออกเสียงก่อน แล้วเลือกแนวตอบที่ใกล้กับสิ่งที่คุณอยากสื่อ</p>
+        <div className="actions">
+          {scenario.branches.map((item) => <Button key={item.id} type="button" variant="outline"
+            aria-pressed={branch?.id === item.id} onClick={() => setBranch(item)}>{item.intent}</Button>)}
+        </div>
+        <Disclosure title="พิมพ์คำตอบของคุณเอง">
+          <Exercise item={{
+            id: `conversation-${scenario.id}-open`, kind: 'conversation',
+            prompt: 'ตอบคู่สนทนาเป็นภาษาอังกฤษด้วยคำของคุณเอง',
+            answers: scenario.branches.map((item) => item.reply.en),
+            hint: 'เลือกว่าคุณต้องการตอบเรื่องไหนก่อน แล้วลองเติมรายละเอียดหรือถามต่อ',
+            explanation: scenario.branches.map((item) => item.reply.note).join(' '),
+          }} objective={scenario.objectiveId} />
+        </Disclosure>
+      </>}
+    </Panel>
+    {branch && <Panel className="stack">
+      <h2>{step === 'first' ? 'ตัวอย่างคำตอบ' : 'แนวตอบที่เลือก'}</h2>
+      <Example {...branch.reply} />
+      {step === 'first' && <div className="actions">
+        <Button type="button" onClick={() => setStep('follow')}>ฟังคำถามต่อ</Button>
+      </div>}
+    </Panel>}
+    {branch && step !== 'first' && <Panel className="stack">
+      <h2 ref={step === 'follow' ? nextHeading : undefined} tabIndex={-1}>คู่สนทนาถามต่อ</h2>
+      <Example {...branch.followUp} />
+      <p>จะพูดตอบเลย หรือพิมพ์คำตอบแล้วเปิดดูตัวอย่างก็ได้</p>
+      <Disclosure title="ลองตอบคำถามต่อ">
+        <Exercise item={{
+          id: `conversation-${scenario.id}-${branch.id}`, kind: 'conversation',
+          prompt: 'ตอบคู่สนทนาเป็นภาษาอังกฤษหนึ่งหรือสองประโยค',
+          answers: branch.followModels.map(({ en }) => en),
+          hint: branch.followHint,
+          explanation: branch.followModels.map(({ note }) => note).join(' '),
+        }} objective={scenario.objectiveId} />
+      </Disclosure>
+      <Disclosure title="ย้อนฟังคำตอบตัวอย่างหลังลองพูด">
+        {branch.followModels.map((item) => <Example key={item.en} {...item} />)}
+      </Disclosure>
+      {step === 'follow' && <div className="actions">
+        <Button type="button" onClick={() => setStep('speak')}>ไปที่งานพูด</Button>
+      </div>}
+    </Panel>}
+    {branch && step === 'speak' && <SpeakingTask scenario={scenario} branch={branch} headingRef={nextHeading} />}
+    {branch && <div className="actions">
+      <Button variant="outline" type="button" onClick={reset}>เริ่มสถานการณ์นี้ใหม่</Button>
+    </div>}
+  </>
+}
+
+export function Conversation() {
+  const { scenarioId } = useParams()
+  const scenario = scenarios.find(({ id }) => id === scenarioId)
+  if (scenario) return <div className="stack page">
+    <Link to={scenarioPath}>← เลือกสถานการณ์</Link>
+    <Heading label="CONVERSATION LAB" title={scenario.title} detail={scenario.context} />
+    <Dialogue key={scenario.id} scenario={scenario} />
+  </div>
+  if (scenarioId) return <div className="stack page">
+    <Heading title="ไม่พบสถานการณ์นี้" />
+    <Link to={scenarioPath}>กลับไปรายการสถานการณ์</Link>
+  </div>
+  return <div className="stack page">
+    <Link to="/practice">← ฝึกใช้</Link>
+    <Heading label="CONVERSATION LAB" title="ฝึกสนทนา" detail="เลือกสถานการณ์ ลองตอบ แล้วฟังว่าคู่สนทนาอาจถามอะไรต่อ" />
+    <div className="grid two">
+      {scenarios.map((item) => <Panel className="stack" key={item.id}>
+        <h2><Link to={`${scenarioPath}/${item.id}`}>{item.title}</Link></h2>
+        <p>{item.context}</p>
+      </Panel>)}
+    </div>
+  </div>
+}
