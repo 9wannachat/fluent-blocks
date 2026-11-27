@@ -199,10 +199,10 @@ img { max-width: 100% }
 .formula { font-weight: 600; padding: .8rem; background: var(--feedback-surface); border-radius: .5rem }
 .lab-link { position: relative }
 .lab-link { transition: border-color 150ms ease, background-color 150ms ease }
-.lab-link h2 a { color: var(--ink); text-decoration: none }
+.lab-link :is(h2, h3) a { color: var(--ink); text-decoration: none }
 @media (hover: hover) { .lab-link:hover { border-color: var(--accent); background: var(--surface-raised) } }
-.lab-link h2 a::after { content: ""; position: absolute; inset: 0; border-radius: .95rem }
-.lab-link h2 a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 3px }
+.lab-link :is(h2, h3) a::after { content: ""; position: absolute; inset: 0; border-radius: .95rem }
+.lab-link :is(h2, h3) a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 3px }
 .lab-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-right: .6rem; border-radius: .65rem; background: var(--soft); color: var(--accent); vertical-align: middle }
 .lab-arrow { color: var(--accent); position: absolute; top: 1.15rem; right: 1.15rem; pointer-events: none }
 
@@ -444,3 +444,18 @@ fieldset { min-width: 0; padding: 0; border: 0 }
 .glossary .example { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; padding: .9rem 0 }
 .glossary .example:first-child { border-top: 0; padding-top: .2rem }
 .example p { color: var(--subtle); font-size: .92rem }
+
+.everyday-forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: .45rem;
+}
+.everyday-forms > div {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: .55rem;
+  padding: .5rem .7rem;
+}
+.everyday-forms dt { color: var(--subtle); font-size: .84rem }
+.everyday-forms dd { margin: 0; font-weight: 600 }
+.everyday-status { margin-inline-start: .5rem; font-weight: 500; color: var(--subtle) }

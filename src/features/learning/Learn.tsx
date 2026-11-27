@@ -8,6 +8,7 @@ import { ArrowRight, Bookmark, CalendarRange, Check, ChevronDown, ChevronRight, 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../components/ui/collapsible'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { curriculum, lessonById, patternById } from '../../content'
+import { practicalPath } from '../../content/practical'
 import { modules } from '../../content/modules'
 import { db, updateProgress } from '../../storage'
 import { lessonSections as sections, lessonSectionsShort } from './lesson-sections'
@@ -30,6 +31,7 @@ export function Learn() {
   const saved = progress.filter((entry) => entry.bookmarked && lessonById.has(entry.lessonId))
   return <div className="stack page">
     <Heading label="LEARN" title="เส้นทางการเรียน" detail="เลือกหัวข้อที่อยากใช้จริง หรือกลับมาทบทวนพื้นฐานได้ทุกเมื่อ" />
+    <Button asChild variant="outline"><Link to={practicalPath}>ภาษาอังกฤษตามสถานการณ์ <ArrowRight size={16} aria-hidden="true" /></Link></Button>
     <Button asChild variant="outline"><Link to="/learn/diagnostic">สำรวจทักษะและเลือกบทเริ่มต้น <ArrowRight size={16} /></Link></Button>
     <Collapsible asChild><Panel className="plan-panel">
       <div className="plan-head">

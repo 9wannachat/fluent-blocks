@@ -1,3 +1,8 @@
+import { PracticalHome, PracticalLessonPage, PracticalModulePage } from '../features/practical/Practical'
+import { practicalPath } from '../content/practical'
+import { everydayPath } from '../content/everyday'
+import { EverydayHome, EverydayDiscovery, EverydayDetail, EverydayCombinations, EverydayComparisons } from '../features/everyday/Everyday'
+import { EverydayPractice } from '../features/everyday/Activities'
 import { Alert } from '../components/ui/alert'
 import { Separator } from '../components/ui/separator'
 import { Button } from '../components/ui/button'
@@ -47,8 +52,9 @@ function Connection() {
 }
 
 export function App() {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   useThemeSync()
+  const builderPreset = new URLSearchParams(search).get('preset') ?? undefined
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [pathname])
   return <div className="shell">
     <a className="skip-link" href="#main">ข้ามไปเนื้อหา</a>
@@ -59,11 +65,24 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/learn" element={<Learn />} />
+        <Route path={practicalPath} element={<PracticalHome />} />
+        <Route path={`${practicalPath}/:moduleId`} element={<PracticalModulePage />} />
+        <Route path={`${practicalPath}/:moduleId/review`} element={<PracticalModulePage review />} />
+        <Route path={`${practicalPath}/:moduleId/:lessonId`} element={<PracticalLessonPage />} />
         <Route path="/learn/diagnostic" element={<Diagnostic />} />
         <Route path="/learn/module/:moduleId/review" element={<ModuleReview />} />
         <Route path="/learn/:lessonId" element={<LessonPage key={pathname} />} />
         <Route path="/practice" element={<Practice />} />
-        <Route path="/practice/builder" element={<div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" detail="เริ่มจากสิ่งที่อยากสื่อ แล้วดูว่าเหตุใดจึงเลือกคำและเรียงแบบนี้" /><Builder /></div>} />
+        <Route path={everydayPath} element={<EverydayHome />} />
+        <Route path={`${everydayPath}/words`} element={<EverydayDiscovery mode="words" />} />
+        <Route path={`${everydayPath}/words/:itemId`} element={<EverydayDetail mode="words" />} />
+        <Route path={`${everydayPath}/phrases`} element={<EverydayDiscovery mode="phrases" />} />
+        <Route path={`${everydayPath}/phrases/:itemId`} element={<EverydayDetail mode="phrases" />} />
+        <Route path={`${everydayPath}/combinations/:itemId?`} element={<EverydayCombinations />} />
+        <Route path={`${everydayPath}/comparisons/:itemId?`} element={<EverydayComparisons />} />
+        <Route path={`${everydayPath}/exercises`} element={<EverydayPractice />} />
+        <Route path={`${everydayPath}/review`} element={<Review everydayOnly />} />
+        <Route path="/practice/builder" element={<div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="SENTENCE BUILDER" title="สร้างประโยคจากเจตนา" detail="เริ่มจากสิ่งที่อยากสื่อ แล้วดูว่าเหตุใดจึงเลือกคำและเรียงแบบนี้" /><Builder key={builderPreset} preset={builderPreset} /></div>} />
         <Route path="/practice/decision" element={<DecisionLab />} />
         <Route path="/practice/connectors" element={<ConnectorLab />} />
         <Route path="/practice/podcast" element={<Podcast />} />

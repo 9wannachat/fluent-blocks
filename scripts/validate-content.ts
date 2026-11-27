@@ -1,3 +1,9 @@
+import { practicalWorkshops } from '../src/content/practical/workshops'
+import { practical } from '../src/content/practical'
+import { everydayRelated } from '../src/content/everyday'
+import { validatePracticalContent } from '../src/domain/practical'
+import { everyday } from '../src/content/everyday'
+import { validateEverydayContent, validateExpansion } from '../src/domain/everyday'
 import { curriculum } from '../src/content'
 import { modules } from '../src/content/modules'
 import { scenarios, scenarioSchema } from '../src/content/scenarios'
@@ -62,3 +68,22 @@ for (const item of scenarios) {
   checkReferences([item.objectiveId], lessonIds, item.id)
 }
 console.log(`Validated ${lessons.length} lessons and ${patterns.length} patterns, and ${scenarios.length} scenarios`)
+
+const lab = validateEverydayContent(everyday, new Set(patternIds.keys()),
+  new Set(lessons.flatMap((lesson) => lesson.exercises.map((exercise) => exercise.id))))
+console.log(`Everyday English Lab: ${lab.words.length} words, ${lab.phrases.length} verb phrases, ${lab.collocations.length} collocations, ${lab.sentencePatterns.length} sentence patterns, ${lab.comparisons.length} comparisons, ${lab.activities.length} contextual activities`)
+
+const practicalPack = validatePracticalContent(practical,
+  new Set([...lessonIds.keys(), ...patternIds.keys(), ...everydayRelated.keys()]),
+  new Set([
+    ...lessons.flatMap((lesson) => lesson.exercises.map(({ id }) => id)),
+    ...[...lab.words, ...lab.phrases].flatMap((item) => item.exercises.map(({ id }) => id)),
+    ...[...lab.comparisons, ...lab.activities, ...lab.workshops].map(({ exercise }) => exercise.id),
+  ]),
+  new Set(scenarios.map(({ id }) => id)))
+console.log(`Practical English: ${practicalPack.lessons.length} lessons and ${practicalPack.scenarios.length} scenarios`)
+
+for (const [lessonId, expansion] of Object.entries(practicalWorkshops)) {
+  if (!practicalPack.lessons.some(({ id }) => id === lessonId)) throw new Error(`Workshop has no lesson: ${lessonId}`)
+  validateExpansion(expansion)
+}

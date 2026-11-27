@@ -1,3 +1,4 @@
+import { resolveReviewItem } from '../../content/review-items'
 import { Link } from 'react-router-dom'
 import { ArrowRight, AudioLines, BookOpen, Clock3, Compass, MessageCircle, PenLine, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -37,7 +38,7 @@ export function Home() {
   const total = orderedLessons.length
   const percent = Math.round(completed.size / total * 100)
   const sectionIndex = Math.min(current?.resumeBlock ?? 0, lessonSections.length - 1)
-  const due = state?.reviews.filter((item) => item.dueOn <= localDateKey(new Date())).length ?? 0
+  const due = state?.reviews.filter((item) => item.dueOn <= localDateKey(new Date()) && resolveReviewItem(item.patternId)).length ?? 0
   const scores = summarizeObjectives(state?.attempts ?? []).filter(({ objectiveId }) => lessonById.has(objectiveId))
   const lastPracticedAt = scores.map((score) => score.lastPracticedAt).sort().at(-1)
   const weakest = scores.filter((score) => score.incorrect > 0).sort((a, b) => (a.accuracy ?? 0) - (b.accuracy ?? 0)).slice(0, 3)
@@ -87,7 +88,7 @@ export function Home() {
     <div className="dashboard-pair">
       <Card className="dashboard-card dashboard-summary">
         <CardHeader className="summary-heading"><span className="dashboard-icon"><RotateCcw size={19} aria-hidden="true" /></span><h2>ทบทวนวันนี้</h2></CardHeader>
-        <CardContent><p>{due ? <><strong>{due}</strong> รูปประโยคถึงกำหนด</> : 'วันนี้ไม่มีรูปประโยคถึงกำหนด'}</p>
+        <CardContent><p>{due ? <><strong>{due}</strong> รายการถึงกำหนด</> : 'วันนี้ไม่มีรายการถึงกำหนด'}</p>
           <Button asChild variant="ghost" className="dashboard-link"><Link to="/review">เปิดคิวทบทวน <ArrowRight aria-hidden="true" /></Link></Button>
         </CardContent>
       </Card>

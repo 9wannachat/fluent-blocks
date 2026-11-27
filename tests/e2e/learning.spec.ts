@@ -79,7 +79,7 @@ test('pattern retrieval and rating update the due queue', async ({ page }) => {
   await page.getByRole('link', { name: 'เปิดคิว' }).click()
   await page.getByRole('button', { name: 'ดูรูปประโยค' }).click()
   await page.getByRole('button', { name: 'พอจำได้' }).click()
-  await expect(page.getByRole('heading', { name: 'วันนี้ไม่มีรูปประโยคถึงกำหนด' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'วันนี้ไม่มีรายการถึงกำหนด' })).toBeVisible()
 })
 
 test('dashboard stays dark and accessible across desktop and mobile', async ({ page }, testInfo) => {

@@ -176,7 +176,7 @@ export function Exercise({ item, objective, onAnswer, showHistory = true }: {
     {reveal && <div className="stack feedback">
       {item.answers.map((variant) => <div className="inline" key={variant}><strong lang="en">{variant}</strong><Speak text={variant} /></div>)}
       <p>{item.explanation}</p>
-      {canAssess && <><p>เช็กด้วยตัวเองว่าใจความชัด กริยาช่วยเหมาะกับเจตนา เรียงคำได้ และเชื่อมความคิดลื่นไหล</p><Button type="button" disabled={assessed || saving} onClick={() => void assess()}>{assessed ? 'ประเมินตนเองแล้ว' : 'บันทึกว่าประเมินตนเองแล้ว'}</Button></>}
+      {canAssess && <>{item.selfCheck ? <><p>เช็กคำตอบของคุณ</p><ul>{item.selfCheck.map((point) => <li key={point}>{point}</li>)}</ul></> : <p>เช็กด้วยตัวเองว่าใจความชัด กริยาช่วยเหมาะกับเจตนา เรียงคำได้ และเชื่อมความคิดลื่นไหล</p>}<Button type="button" disabled={assessed || saving} onClick={() => void assess()}>{assessed ? 'ประเมินตนเองแล้ว' : 'บันทึกว่าประเมินตนเองแล้ว'}</Button></>}
     </div>}
     {error && <AlertMessage>{error}</AlertMessage>}
   </form>

@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import Dexie from 'dexie';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  applyBackup, exportBackup, getRecoveryBackup, previewBackup, ratePattern, recordAttempt,
+  applyBackup, enqueuePattern, exportBackup, getRecoveryBackup, previewBackup, ratePattern, recordAttempt,
   savePodcastEntry, saveSettings, saveVocabulary, StudyDatabase, updateProgress,
   type Backup,
 } from './index';
@@ -30,6 +30,35 @@ afterEach(async () => {
 });
 
 describe('study storage', () => {
+  it('round-trips a practical lesson and its review in the original backup format', async () => {
+    const lesson = 'practical-dining-ingredients';
+    const card = `practical-review:${lesson}`;
+    await updateProgress(lesson, { completed: true }, store);
+    await recordAttempt({ exerciseId: `${lesson}-roleplay`, objectiveId: lesson, outcome: 'self-assessed' }, store);
+    await enqueuePattern(card, new Date(2026, 10, 27, 10), store);
+    const copy = await previewBackup(await exportBackup(store), remote);
+    expect(copy.backup.version).toBe(1);
+    await applyBackup(copy, 'merge', remote);
+    expect(await remote.progress.get(lesson)).toMatchObject({ completed: true });
+    expect(await remote.reviews.get(card)).toMatchObject({ patternId: card });
+    expect(await remote.attempts.where('objectiveId').equals(lesson).toArray()).toMatchObject([{ outcome: 'self-assessed' }]);
+  });
+
+  it('round-trips Everyday completion, attempts and review without changing the backup version', async () => {
+    const id = 'everyday-word-pour';
+    await updateProgress(id, { completed: true }, store);
+    await recordAttempt({ exerciseId: `${id}-forms`, objectiveId: id, outcome: 'correct' }, store);
+    const card = await enqueuePattern(id, new Date(2026, 10, 27, 10), store);
+    const secondary = await enqueuePattern('everyday-phrase-take-off:flight', new Date(2026, 10, 27, 10), store);
+    const preview = await previewBackup(await exportBackup(store), remote);
+    expect(preview.backup.version).toBe(1);
+    await applyBackup(preview, 'merge', remote);
+    expect(await remote.progress.get(id)).toMatchObject({ completed: true });
+    expect(await remote.attempts.where('objectiveId').equals(id).toArray()).toMatchObject([{ outcome: 'correct' }]);
+    expect(await remote.reviews.get('everyday-phrase-take-off:flight')).toEqual(secondary);
+    expect(await remote.reviews.get(id)).toEqual(card);
+  });
+
   it('preserves independent writes and restores data on re-open', async () => {
     await Promise.all([
       updateProgress('do-support', { bookmarked: true }, store),

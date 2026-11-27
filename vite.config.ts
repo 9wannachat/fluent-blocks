@@ -10,6 +10,8 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: 'framework', test: /\/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\// },
+            { name: 'practical-content', test: /\/src\/content\/practical\//, includeDependenciesRecursively: false },
+            { name: 'everyday-content', test: /\/src\/content\/everyday\//, includeDependenciesRecursively: false },
             { debugName: 'curriculum', name: (id) => id.match(/\/src\/content\/([a-z0-9-]+)\.ts$/)?.[1] },
           ],
         },

@@ -92,8 +92,13 @@ function reconcile(input: GrammarInput, change: Partial<GrammarInput>): GrammarI
   return next
 }
 
-export function Builder() {
-  const [input, setInput] = useState<GrammarInput>(defaultGrammarInput)
+export function Builder({ preset }: { preset?: string }) {
+  const [input, setInput] = useState<GrammarInput>(() => {
+    if (preset === 'contain') return { ...defaultGrammarInput, subject: 'it', kind: 'yesNo', predicate: 'containPeanuts' }
+    if (preset === 'pour') return { ...defaultGrammarInput, subject: 'I', intention: 'now', predicate: 'pourWater' }
+    if (preset === 'wear') return { ...defaultGrammarInput, subject: 'I', predicate: 'wearGlasses' }
+    return defaultGrammarInput
+  })
   const update = (change: Partial<GrammarInput>) => setInput((previous) => reconcile(previous, change))
   const result = buildSentence(input)
   const kinds = kindOptions(input.intention).map((value) => ({ value, label: sentenceKinds[value] }))

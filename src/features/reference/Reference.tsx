@@ -13,6 +13,9 @@ import { modules } from '../../content/modules'
 import { BackLink, Example, Heading, Missing, Panel, RowLink } from '../../components/ui'
 import { db, enqueuePattern, ratePattern } from '../../storage'
 import { localDateKey } from '../../domain/review'
+import { resolveReviewItem, type ReviewItem } from '../../content/review-items'
+import { practicalReviewItems } from '../../content/practical'
+import { everydayReviewItems } from '../../content/everyday'
 import type { Pattern } from '../../domain/content'
 
 const normalize = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[‘’]/g, "'").trim()
@@ -86,7 +89,7 @@ export function Reference() {
     <Panel className="stack">
       <Label><span className="inline"><Search size={17} /> ค้นหา</span><Input type="search" value={query} onChange={(event) => change('q', event.target.value)} placeholder="เช่น still, ขอคำแนะนำ, กริยาช่วย" /></Label>
       <Label>กรองตามเจตนา<NativeSelect value={intent} onChange={(event) => change('intent', event.target.value)}><NativeSelectOption value="">ทุกเจตนา</NativeSelectOption>{intents.map((item) => <NativeSelectOption key={item}>{item}</NativeSelectOption>)}</NativeSelect></Label>
-      <div className="actions"><Button asChild variant="outline"><Link to="/reference/notebook">สมุดคำศัพท์</Link></Button><Button asChild variant="outline"><Link to="/review">ทบทวน</Link></Button></div>
+      <div className="actions"><Button asChild variant="outline"><Link to="/reference/notebook">สมุดคำศัพท์</Link></Button><Button asChild variant="outline"><Link to="/practice/everyday/words">คำศัพท์ในชีวิตประจำวัน</Link></Button><Button asChild variant="outline"><Link to="/review">ทบทวน</Link></Button></div>
     </Panel>
     <Panel className="stack"><h2>รูปประโยค <small aria-live="polite">{shown.length} รูปแบบ</small></h2>
       {shown.length ? <ul className="clean lesson-list">{shown.slice(0, limit).map((pattern) => <PatternRow pattern={pattern} key={pattern.id} />)}</ul> : <p>ไม่พบรูปประโยค ลองค้นคำสั้นลงหรือเลือกทุกเจตนา</p>}
@@ -137,7 +140,7 @@ export function TopicPage() {
 
 const ratings = [['again', 'ขอเริ่มใหม่'], ['hard', 'ยาก'], ['good', 'พอจำได้'], ['easy', 'ง่าย']] as const
 
-function ReviewCard({ pattern }: { pattern: Pattern }) {
+function ReviewCard({ pattern, vocabulary }: { pattern: ReviewItem; vocabulary: boolean }) {
   const [revealed, setRevealed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
@@ -146,19 +149,27 @@ function ReviewCard({ pattern }: { pattern: Pattern }) {
     setError(false)
     try { await ratePattern(pattern.id, rating) } catch { setError(true) } finally { setBusy(false) }
   }
-  return <Panel className="stack"><h2>{pattern.meaning}</h2><p>{pattern.intent}</p>
-    {revealed ? <><p lang="en" className="formula">{pattern.template}</p>{pattern.examples.map((item) => <Example {...item} key={item.en} />)}
+  return <Panel className="stack"><h2>{pattern.meaning}</h2><p>{pattern.context}</p>
+    {revealed ? <><p lang="en" className="formula">{pattern.term}</p>{pattern.examples.map((item) => <Example {...item} key={item.en} />)}
+      {pattern.to && <Link to={pattern.to}>เปิดความหมายที่กำลังทบทวน</Link>}
       <p>เมื่อกี้นึกออกได้มากแค่ไหน</p><div className="actions">{ratings.map(([value, label]) => <Button type="button" disabled={busy} variant="outline" key={value} onClick={() => void rate(value)}>{label}</Button>)}</div></> :
-      <><p>ลองพูดวลีพร้อมตัวอย่างของคุณก่อนดูคำตอบ</p><Button type="button" onClick={() => setRevealed(true)}>ดูรูปประโยค</Button></>}
+      <><p>{vocabulary ? 'ลองนึกคำภาษาอังกฤษจากบริบท แล้วพูดหนึ่งประโยคก่อนดูคำตอบ' : 'ลองพูดวลีพร้อมตัวอย่างของคุณก่อนดูคำตอบ'}</p><Button type="button" onClick={() => setRevealed(true)}>{vocabulary ? 'ดูคำตอบและตัวอย่าง' : 'ดูรูปประโยค'}</Button></>}
     {error && <AlertMessage>บันทึกการทบทวนไม่ได้ ลองอีกครั้ง</AlertMessage>}
   </Panel>
 }
 
-export function Review() {
+export function Review({ everydayOnly = false }: { everydayOnly?: boolean }) {
   const today = localDateKey(new Date())
   const due = useLiveQuery(() => db.reviews.where('dueOn').belowOrEqual(today).toArray(), [today])
-  const next = due?.map((item) => patternById.get(item.patternId)).find((item) => item !== undefined)
-  return <div className="stack page"><BackLink to="/practice">ฝึกใช้</BackLink><Heading label="REVIEW" title="ทบทวนจากความจำ" detail="เมื่อให้คะแนนความจำ ระบบใช้ช่วง 1, 3, 7, 14 และ 30 วันเพื่อจัดคิวให้กลับมาฝึกอีกครั้ง" />
-    {due === undefined ? <p role="status">กำลังเปิดคิว</p> : next ? <ReviewCard pattern={next} key={next.id} /> : <Panel className="stack"><h2>วันนี้ไม่มีรูปประโยคถึงกำหนด</h2><p className="muted">เปิดรูปประโยคในคลัง แล้วกด “เพิ่มในคิวทบทวน” เพื่อให้กลับมาฝึกตามรอบ</p><Button asChild variant="outline" className="module-review"><Link to="/reference">เลือกรูปประโยคจากคลัง <ArrowRight size={15} /></Link></Button></Panel>}
+  const next = due?.filter((item) => !everydayOnly || everydayReviewItems.has(item.patternId))
+    .map((item) => resolveReviewItem(item.patternId)).find((item) => item !== undefined)
+  return <div className="stack page">
+    <BackLink to={everydayOnly ? '/practice/everyday' : '/practice'}>{everydayOnly ? 'Everyday English Lab' : 'ฝึกใช้'}</BackLink>
+    <Heading label="REVIEW" title={everydayOnly ? 'ทบทวนคำและวลี' : 'ทบทวนจากความจำ'} detail="เมื่อให้คะแนนความจำ ระบบใช้ช่วง 1, 3, 7, 14 และ 30 วันเพื่อจัดคิวให้กลับมาฝึกอีกครั้ง" />
+    {due === undefined ? <p role="status">กำลังเปิดคิว</p> : next ? <ReviewCard pattern={next} vocabulary={everydayReviewItems.has(next.id) || practicalReviewItems.has(next.id)} key={next.id} /> :
+      <Panel className="stack"><h2>{everydayOnly ? 'วันนี้ไม่มีคำหรือวลีถึงกำหนด' : 'วันนี้ไม่มีรายการถึงกำหนด'}</h2>
+        <p className="muted">เปิดรายการที่อยากฝึก แล้วกด “เพิ่มในคิวทบทวน” เพื่อกลับมาฝึกตามรอบ</p>
+        <Button asChild variant="outline" className="module-review"><Link to={everydayOnly ? '/practice/everyday/words' : '/reference'}>{everydayOnly ? 'สำรวจคำศัพท์' : 'เลือกรูปประโยคจากคลัง'} <ArrowRight size={15} /></Link></Button>
+      </Panel>}
   </div>
 }

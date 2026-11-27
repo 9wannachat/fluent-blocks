@@ -2,11 +2,12 @@ import { Button } from '../../components/ui/button'
 import { Disclosure } from '../../components/ui/disclosure'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, AudioLines, BookOpenCheck, Cable, MessageCircle, Puzzle, Waypoints } from 'lucide-react'
+import { ArrowRight, AudioLines, BookOpenCheck, Cable, MessageCircle, Puzzle, Waypoints, BookOpen } from 'lucide-react'
 import { BackLink, Heading, Panel, Example } from '../../components/ui'
 import { Exercise } from './Exercise'
 
 const tools = [
+  { title: 'คำศัพท์ในชีวิตประจำวัน', en: 'Everyday English Lab', detail: 'เลือกคำจากสถานการณ์จริงและฝึกใช้คำในประโยคของคุณ', route: 'everyday', icon: BookOpen },
   { title: 'สร้างประโยค', en: 'Sentence Builder', detail: 'เลือกเจตนาแล้วดูว่าคำแต่ละส่วนทำงานอย่างไร', route: 'builder', icon: Puzzle },
   { title: 'เลือกโครงสร้าง', en: 'Decision Lab', detail: 'เทียบความหมายก่อนเลือกกริยาช่วยและรูปกริยา', route: 'decision', icon: Waypoints },
   { title: 'ขยายและเชื่อมประโยค', en: 'Connector Lab', detail: 'ลองย้ายคำ เปลี่ยนจุดเน้น และเชื่อมความคิด', route: 'connectors', icon: Cable },

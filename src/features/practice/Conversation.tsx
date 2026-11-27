@@ -7,6 +7,8 @@ import { AlertMessage } from '../../components/ui/alert-message'
 import { useEffect, useRef, useState, type Ref } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BackLink, Example, Heading, Panel } from '../../components/ui'
+import { practical, practicalLessonById, practicalLessonPath, practicalModules, practicalScenarioById } from '../../content/practical'
+import type { PracticalScenario } from '../../domain/practical'
 import { scenarios, type Scenario } from '../../content/scenarios'
 import { recordAttempt } from '../../storage'
 import { Exercise } from './Exercise'
@@ -20,7 +22,7 @@ const criteria = [
   'ใช้น้ำเสียงและคำที่เหมาะกับคู่สนทนา',
 ]
 
-type Branch = Scenario['branches'][number]
+type Branch = Scenario['branches'][number] | PracticalScenario['branches'][number]
 
 function SpeakingTask({ scenario, branch, headingRef }: {
   scenario: Scenario; branch: Branch; headingRef: Ref<HTMLHeadingElement>
@@ -65,7 +67,7 @@ function SpeakingTask({ scenario, branch, headingRef }: {
   </Panel>
 }
 
-function Dialogue({ scenario }: { scenario: Scenario }) {
+function Dialogue({ scenario, graded }: { scenario: Scenario | PracticalScenario; graded: boolean }) {
   const [branch, setBranch] = useState<Branch | null>(null)
   const [step, setStep] = useState<'first' | 'follow' | 'speak'>('first')
   const firstHeading = useRef<HTMLHeadingElement>(null)
@@ -92,7 +94,7 @@ function Dialogue({ scenario }: { scenario: Scenario }) {
         </div>
         <Disclosure title="พิมพ์คำตอบของคุณเอง">
           <Exercise item={{
-            id: `conversation-${scenario.id}-open`, kind: 'conversation',
+            id: `conversation-${scenario.id}-open`, kind: graded ? 'translate' : 'conversation',
             prompt: 'ตอบคู่สนทนาเป็นภาษาอังกฤษด้วยคำของคุณเอง',
             answers: scenario.branches.map((item) => item.reply.en),
             hint: 'เลือกว่าคุณต้องการตอบเรื่องไหนก่อน แล้วลองเติมรายละเอียดหรือถามต่อ',
@@ -113,7 +115,7 @@ function Dialogue({ scenario }: { scenario: Scenario }) {
       <Example {...branch.followUp} />
       <p>จะพูดตอบเลย หรือพิมพ์คำตอบแล้วเปิดดูตัวอย่างก็ได้</p>
       <Disclosure title="ลองตอบคำถามต่อ">
-        <Exercise item={{
+        <Exercise key={branch.id} item={'exercise' in branch ? branch.exercise : {
           id: `conversation-${scenario.id}-${branch.id}`, kind: 'conversation',
           prompt: 'ตอบคู่สนทนาเป็นภาษาอังกฤษหนึ่งหรือสองประโยค',
           answers: branch.followModels.map(({ en }) => en),
@@ -137,11 +139,14 @@ function Dialogue({ scenario }: { scenario: Scenario }) {
 
 export function Conversation() {
   const { scenarioId } = useParams()
-  const scenario = scenarios.find(({ id }) => id === scenarioId)
+  const added = scenarioId ? practicalScenarioById.get(scenarioId) : undefined
+  const scenario = added ?? scenarios.find(({ id }) => id === scenarioId)
+  const lesson = added ? practicalLessonById.get(added.objectiveId) : undefined
   if (scenario) return <div className="stack page">
     <BackLink to={scenarioPath}>เลือกสถานการณ์</BackLink>
     <Heading label="CONVERSATION LAB" title={scenario.title} detail={scenario.context} />
-    <Dialogue key={scenario.id} scenario={scenario} />
+    {lesson && <Link to={practicalLessonPath(lesson)}>เปิดบทเรียนและคำศัพท์ของสถานการณ์นี้</Link>}
+    <Dialogue key={scenario.id} scenario={scenario} graded={Boolean(added)} />
   </div>
   if (scenarioId) return <div className="stack page">
     <Heading title="ไม่พบสถานการณ์นี้" />
@@ -150,12 +155,19 @@ export function Conversation() {
   return <div className="stack page">
     <BackLink to="/practice">ฝึกใช้</BackLink>
     <Heading label="CONVERSATION LAB" title="ฝึกสนทนา" detail="เลือกสถานการณ์ ลองตอบ แล้วฟังว่าคู่สนทนาอาจถามอะไรต่อ" />
-    <div className="grid two">
+    {practicalModules.map((module) => <section className="stack" key={module.id}>
+      <h2>{module.title}</h2>
+      <div className="grid two">{practical.scenarios.filter((item) => practicalLessonById.get(item.objectiveId)?.moduleId === module.id).map((item) =>
+        <Panel className="stack lab-link scenario-card" key={item.id}>
+          <h3><Link to={`${scenarioPath}/${item.id}`}>{item.title}</Link></h3><p>{item.context}</p>
+        </Panel>)}</div>
+    </section>)}
+    <section className="stack"><h2>สถานการณ์ทั่วไป</h2><div className="grid two">
       {scenarios.map((item) => <Panel className="stack lab-link scenario-card" key={item.id}>
-        <h2><Link to={`${scenarioPath}/${item.id}`}>{item.title}</Link></h2>
+        <h3><Link to={`${scenarioPath}/${item.id}`}>{item.title}</Link></h3>
         <p>{item.context}</p>
         <ChevronRight className="lab-arrow" size={18} aria-hidden="true" />
       </Panel>)}
-    </div>
+    </div></section>
   </div>
 }

@@ -72,3 +72,25 @@ The mobile tab bar now shows an icon and a single Thai label, with the active ic
 - Remaining pages were brought in line. Conversation scenarios are hover cards. Podcast, Notebook and Review have back links. The Review empty state explains how to add patterns. The diagnostic hides "next" until answered. Bookmarks, related lessons and pattern links use the shared RowLink.
 - Vitest passed 30 tests and Playwright passed 30 checks. axe runs in light mode on 16 routes, and a one-off dark sweep of the same routes was clean.
 Examples are lighter raised cards with an inset accent edge, quieter Thai and notes, and a small round audio button. The Reference glossary is a divided list.
+
+## Everyday English Lab
+
+Entry points are Practice → คำศัพท์ในชีวิตประจำวัน and Reference → คำศัพท์ในชีวิตประจำวัน. The dedicated routes cover discovery and detail, verb phrases, comparisons, collocations and sentence patterns, seven contextual exercise types, guided sentence expansion, and vocabulary review. Search supports English, Thai, phrases and inflected forms, with filters for category or base verb, difficulty and learned state.
+
+The first release targets 60 contextual words in eight categories, 30 multi-word verbs in nine base-verb groups, 30 collocations, 30 sentence-pattern views and 17 comparisons. The larger brief targets remain a future curriculum expansion. Content is bundled through the existing PWA. Learner data remains local and round-trips in existing JSON backups.
+
+Reference checks for the initial editorial pass include Cambridge Dictionary's [multi-word verb grammar](https://dictionary.cambridge.org/uk/grammar/british-grammar/phrasal-verbs), [participial adjective grammar](https://dictionary.cambridge.org/us/grammar/british-grammar/-ing-and-ed-adjectives), and [pour](https://dictionary.cambridge.org/pronunciation/english/pour) and [wear](https://dictionary.cambridge.org/pronunciation/english/wear) pronunciations. The app has authored examples and uses the device voice when available.
+
+The initial inventory validated at 60 words, 30 multi-word verbs, 30 collocations, 30 sentence-pattern views, 17 comparisons and 21 contextual activities. Content validation, typecheck, lint and production build passed. Vitest passed 34 tests across 11 suites. Playwright passed 44 checks on Chromium and WebKit, including Thai query and category filtering, return to previous filters, learned state and review persistence, production answer variants, interactive expansion, 320 px and desktop accessibility, and offline vocabulary deep links.
+
+## Everyday integration follow-up
+
+Contextual search now displays and opens the matching sense. Selected meanings can link to related vocabulary, collocations, comparisons, patterns and activities. Vocabulary-to-sentence workshops for pour, wear and take off share the existing exercise and expansion engines. Pour and wear also offer direct Builder presets. The review queue accepts cards for a selected sense and resolves earlier headword review IDs. The app still uses the existing theme tokens and version-1 backups.
+
+Follow-up verification passed content validation, TypeScript, ESLint, 34 Vitest tests, production build, and all 48 Chromium/WebKit Playwright checks. Coverage includes matching Thai queries to secondary senses, reviewing a selected meaning, v1 backup round-tripping, all three contextual workshops, 320 px and desktop axe checks, and the offline vocabulary deep link.
+
+## Travel, dining, shopping and assistance
+
+The approved expansion adds four dedicated labs under Learn → ภาษาอังกฤษตามสถานการณ์. The inventory is Travel (8 lessons), Restaurant & Dining (11), Shopping (9), and Travel Problems & Emergency (9). Each module links to cumulative practice. New authored scenarios appear by lab alongside the original Conversation Lab catalog. The ingredient Builder preset starts from an explicit noun and shows do-support with `Does it contain peanuts?`, which can be used when the dish is already understood.
+
+Content validation, TypeScript, ESLint, the production build, 39 Vitest tests and 56 Chromium/WebKit Playwright checks passed. Browser coverage includes branching roleplay feedback, review persistence, the offline lesson-to-Builder path, and accessibility scans at 320 and 1280 px. Learner progress and review items round-trip through version-1 backups.

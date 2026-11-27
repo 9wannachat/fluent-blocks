@@ -16,6 +16,7 @@ export const exerciseSchema = z.object({
   hint: line,
   explanation: line,
   feedback: z.record(line, line).optional(),
+  selfCheck: z.array(line).min(1).optional(),
   difficulty: z.enum(['recognition', 'guided', 'production']).optional(),
 })
 
